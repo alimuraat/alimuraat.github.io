@@ -1,0 +1,54 @@
+---
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import { t, localePath, basePath, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+/* Trailing slashes are normalised so /experience and /experience/ both mark
+   the same nav item as current. */
+const strip = (p: string) => p.replace(/\/+$/, '') || '/';
+const here = strip(Astro.url.pathname);
+
+/* The switcher points at the same page in the other language. */
+const bare = basePath(Astro.url.pathname);
+---
+
+<header>
+  <nav class="nav" aria-label={t(ui.navAria, lang)}>
+    <a class="brand" href={localePath('/', lang)}>{site.initials}</a>
+
+    <ul>
+      {
+        site.nav.map((item) => {
+          const href = localePath(item.href, lang);
+          return (
+            <li>
+              <a class="item" href={href} aria-current={strip(href) === here ? 'page' : undefined}>
+                {t(item.label, lang)}
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <div class="tail">
+      <p class="status"><span class="dot" aria-hidden="true"></span>{t(ui.status, lang)}</p>
+      <ul class="lang" aria-label={t(ui.langAria, lang)}>
+        <li>
+          <a href={bare} hreflang="en" aria-current={lang === 'en' ? 'true' : undefined}>EN</a>
+        </li>
+        <li>
+          <a href={`/tr${bare}`} hreflang="tr" aria-current={lang === 'tr' ? 'true' : undefined}>
+            TR
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>

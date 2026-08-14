@@ -1,0 +1,31 @@
+{
+  "shell": "amt@istanbul — zsh",
+  "summary": {
+    "en": "Ali Murat Tava — senior cyber security engineer, Istanbul, Türkiye. Focus: offensive security; web, API and mobile penetration testing; application security; vulnerability management; ISO 27001 ISMS; ISO/IEC 42001 AI governance. CVE-2026-18205 is reserved and pending a vendor fix.",
+    "tr": "Ali Murat Tava — kıdemli siber güvenlik mühendisi, İstanbul, Türkiye. Odak: ofansif güvenlik; web, API ve mobil sızma testi; uygulama güvenliği; zafiyet yönetimi; ISO 27001 BGYS; ISO/IEC 42001 yapay zeka yönetişimi. CVE-2026-18205 rezerve edildi ve üretici düzeltmesi bekleniyor."
+  },
+  "lines": {
+    "en": [
+      { "p": "$ ", "t": "whoami" },
+      { "o": "ali murat tava — senior cyber security engineer" },
+      { "o": "istanbul, türkiye" },
+      { "p": "$ ", "t": "cat ./focus" },
+      { "o": "offensive security  ·  web / api / mobile pentest" },
+      { "o": "application security  ·  vulnerability management" },
+      { "o": "iso 27001 isms  ·  iso/iec 42001 ai governance" },
+      { "p": "$ ", "t": "ls ./cve" },
+      { "o": "CVE-2026-18205  [reserved · pending vendor fix]" }
+    ],
+    "tr": [
+      { "p": "$ ", "t": "whoami" },
+      { "o": "ali murat tava — kıdemli siber güvenlik mühendisi" },
+      { "o": "istanbul, türkiye" },
+      { "p": "$ ", "t": "cat ./focus" },
+      { "o": "ofansif güvenlik  ·  web / api / mobil sızma testi" },
+      { "o": "uygulama güvenliği  ·  zafiyet yönetimi" },
+      { "o": "iso 27001 bgys  ·  iso/iec 42001 yz yönetişimi" },
+      { "p": "$ ", "t": "ls ./cve" },
+      { "o": "CVE-2026-18205  [rezerve · üretici düzeltmesi bekleniyor]" }
+    ]
+  }
+}

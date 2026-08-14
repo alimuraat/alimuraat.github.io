@@ -1,0 +1,135 @@
+---
+/**
+ * Hero terminal. The lines live in src/data/boot.json and reach the client
+ * through a data- attribute — no inline script, so the CSP needs no
+ * 'unsafe-inline'.
+ *
+ * The animated body is aria-hidden and the same content is exposed to screen
+ * readers once, as a static sentence, instead of being announced character by
+ * character. Without JS, the <noscript> transcript is shown.
+ */
+import boot from '../data/boot.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const lines = t(boot.lines, lang) as { p?: string; t?: string; o?: string }[];
+const summary = t(boot.summary, lang);
+---
+
+<div class="term">
+  <div class="term-bar" aria-hidden="true">
+    <i></i><i></i><i></i><span>{boot.shell}</span>
+  </div>
+  <p class="sr-only">{summary}</p>
+  <div class="term-body" id="term" aria-hidden="true" data-boot={JSON.stringify(lines)}>
+    <noscript>
+      {
+        lines.map((l) =>
+          l.o ? (
+            <span class="out">{l.o}</span>
+          ) : (
+            <div>
+              <span class="p">{l.p}</span>
+              {l.t}
+            </div>
+          )
+        )
+      }
+    </noscript>
+  </div>
+</div>
+
+<script>
+  type Line = { p?: string; t?: string; o?: string };
+
+  const el = document.getElementById('term');
+  const raw = el?.dataset.boot;
+
+  if (el && raw) {
+    const lines: Line[] = JSON.parse(raw);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const CHAR_MS = 44;   // per typed character
+    const LINE_MS = 230;  // between printed output lines
+    const PROMPT_MS = 170;
+
+    el.textContent = '';
+
+    const outLine = (text: string) => {
+      const s = document.createElement('span');
+      s.className = 'out';
+      s.textContent = text;
+      return s;
+    };
+
+    const cmdLine = (prompt: string, text: string) => {
+      const d = document.createElement('div');
+      const p = document.createElement('span');
+      p.className = 'p';
+      p.textContent = prompt;
+      d.append(p, document.createTextNode(text));
+      return d;
+    };
+
+    const cursor = () => {
+      const c = document.createElement('span');
+      c.className = 'cursor';
+      return c;
+    };
+
+    if (reduce) {
+      for (const l of lines) {
+        el.append(l.o !== undefined ? outLine(l.o) : cmdLine(l.p ?? '$ ', l.t ?? ''));
+      }
+      const tail = cmdLine('$ ', '');
+      tail.append(cursor());
+      el.append(tail);
+    } else {
+      let i = 0;
+
+      const finish = () => {
+        const tail = cmdLine('$ ', '');
+        tail.append(cursor());
+        el.append(tail);
+      };
+
+      const nextLine = () => {
+        if (i >= lines.length) return finish();
+
+        const l = lines[i];
+        if (l.o !== undefined) {
+          el.append(outLine(l.o));
+          i++;
+          setTimeout(nextLine, LINE_MS);
+          return;
+        }
+
+        const text = l.t ?? '';
+        const row = cmdLine(l.p ?? '$ ', '');
+        const node = row.childNodes[1] as Text;
+        const car = cursor();
+        row.append(car);
+        el.append(row);
+
+        let j = 0;
+        const type = () => {
+          if (j < text.length) {
+            node.data += text[j++];
+            setTimeout(type, CHAR_MS);
+          } else {
+            car.remove();
+            i++;
+            setTimeout(nextLine, PROMPT_MS);
+          }
+        };
+        type();
+      };
+
+      setTimeout(nextLine, 400);
+    }
+  }
+</script>

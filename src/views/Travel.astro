@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import WorldMap from '../components/WorldMap.astro';
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import data from '../data/places.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = site.pages.travel;
+
+/* Counts and the country list are derived, so adding a place to
+   src/data/places.json updates the copy too. */
+const byCountry = new Map<string, string[]>();
+for (const p of data.places) {
+  const country = t(p.country, lang);
+  byCountry.set(country, [...(byCountry.get(country) ?? []), t(p.city, lang)]);
+}
+---
+
+<Base lang={lang} title={t(page.title, lang)} description={t(page.description, lang)} backdrop="none">
+  <section>
+    <p class="eyebrow">{t(page.eyebrow, lang)}</p>
+    <GlitchTitle text={t(page.heading, lang)} />
+    <p class="lede">{t(page.lede, lang)}</p>
+
+    <p class="count">
+      {data.places.length}
+      {t(ui.cities, lang)} · {byCountry.size}
+      {t(ui.countries, lang)}
+    </p>
+
+    <WorldMap lang={lang} />
+
+    <h2 class="sub">{t(ui.where, lang)}</h2>
+    <ul class="stack-list">
+      {
+        [...byCountry].map(([country, cities]) => (
+          <li>
+            <span class="k">{country}</span>
+            <span class="v">{cities.join(' · ')}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>

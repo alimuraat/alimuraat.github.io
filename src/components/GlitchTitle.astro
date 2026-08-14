@@ -1,0 +1,29 @@
+---
+/**
+ * Three stacked copies of the same string. Only the first one is a real
+ * heading; layers 2 and 3 are aria-hidden decoration offset by a few pixels
+ * and blended with mix-blend-mode:screen to fake chromatic separation.
+ *
+ * The decorative layers carry their text in data-text and paint it through a
+ * CSS ::before, so the string appears once in the document text rather than
+ * three times over — screen readers skip them, and so does anything that
+ * scrapes text without applying CSS.
+ *
+ * `as` picks the tag, `size` picks the type scale — inner pages want a real
+ * <h1> at the h2 size, since every page carries exactly one h1.
+ */
+interface Props {
+  text: string;
+  as?: 'h1' | 'h2';
+  size?: 'h1' | 'h2';
+}
+
+const { text, as = 'h1', size = 'h2' } = Astro.props;
+const Tag = as;
+---
+
+<div class:list={['stack', size === 'h1' ? 's-h1' : 's-h2']}>
+  <Tag class="layer">{text}</Tag>
+  <span class="layer l2" aria-hidden="true" data-text={text}></span>
+  <span class="layer l3" aria-hidden="true" data-text={text}></span>
+</div>

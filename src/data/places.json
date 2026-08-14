@@ -1,0 +1,119 @@
+{
+  "_note": "lat/lon are plain WGS84 degrees and are never translated. WorldMap.astro projects them with the same equirectangular formula scripts/make-worldmap.mjs used for the coastline, so adding a place is one entry here and nothing else.",
+  "places": [
+    {
+      "lat": 35.6762,
+      "lon": 139.6503,
+      "city": { "en": "Tokyo", "tr": "Tokyo" },
+      "country": { "en": "Japan", "tr": "Japonya" }
+    },
+    {
+      "lat": 35.0116,
+      "lon": 135.7681,
+      "city": { "en": "Kyoto", "tr": "Kyoto" },
+      "country": { "en": "Japan", "tr": "Japonya" }
+    },
+    {
+      "lat": 34.6937,
+      "lon": 135.5023,
+      "city": { "en": "Osaka", "tr": "Osaka" },
+      "country": { "en": "Japan", "tr": "Japonya" }
+    },
+    {
+      "lat": 52.3676,
+      "lon": 4.9041,
+      "city": { "en": "Amsterdam", "tr": "Amsterdam" },
+      "country": { "en": "Netherlands", "tr": "Hollanda" }
+    },
+    {
+      "lat": 48.8566,
+      "lon": 2.3522,
+      "city": { "en": "Paris", "tr": "Paris" },
+      "country": { "en": "France", "tr": "Fransa" }
+    },
+    {
+      "lat": 48.1351,
+      "lon": 11.582,
+      "city": { "en": "Munich", "tr": "Münih" },
+      "country": { "en": "Germany", "tr": "Almanya" }
+    },
+    {
+      "lat": 45.4408,
+      "lon": 12.3155,
+      "city": { "en": "Venice", "tr": "Venedik" },
+      "country": { "en": "Italy", "tr": "İtalya" }
+    },
+    {
+      "lat": 43.7696,
+      "lon": 11.2558,
+      "city": { "en": "Florence", "tr": "Floransa" },
+      "country": { "en": "Italy", "tr": "İtalya" }
+    },
+    {
+      "lat": 41.9028,
+      "lon": 12.4964,
+      "city": { "en": "Rome", "tr": "Roma" },
+      "country": { "en": "Italy", "tr": "İtalya" }
+    },
+    {
+      "lat": 41.9029,
+      "lon": 12.4534,
+      "city": { "en": "Vatican City", "tr": "Vatikan" },
+      "country": { "en": "Vatican City", "tr": "Vatikan" }
+    },
+    {
+      "lat": 41.3874,
+      "lon": 2.1686,
+      "city": { "en": "Barcelona", "tr": "Barselona" },
+      "country": { "en": "Spain", "tr": "İspanya" }
+    },
+    {
+      "lat": 40.4168,
+      "lon": -3.7038,
+      "city": { "en": "Madrid", "tr": "Madrid" },
+      "country": { "en": "Spain", "tr": "İspanya" }
+    },
+    {
+      "lat": 41.0082,
+      "lon": 28.9784,
+      "city": { "en": "Istanbul", "tr": "İstanbul" },
+      "country": { "en": "Türkiye", "tr": "Türkiye" }
+    },
+    {
+      "lat": 39.9334,
+      "lon": 32.8597,
+      "city": { "en": "Ankara", "tr": "Ankara" },
+      "country": { "en": "Türkiye", "tr": "Türkiye" }
+    },
+    {
+      "lat": 38.4237,
+      "lon": 27.1428,
+      "city": { "en": "İzmir", "tr": "İzmir" },
+      "country": { "en": "Türkiye", "tr": "Türkiye" }
+    },
+    {
+      "lat": 37.0344,
+      "lon": 27.4305,
+      "city": { "en": "Bodrum", "tr": "Bodrum" },
+      "country": { "en": "Türkiye", "tr": "Türkiye" }
+    },
+    {
+      "lat": 39.75,
+      "lon": 39.5,
+      "city": { "en": "Erzincan", "tr": "Erzincan" },
+      "country": { "en": "Türkiye", "tr": "Türkiye" }
+    },
+    {
+      "lat": 37.0662,
+      "lon": 37.3833,
+      "city": { "en": "Gaziantep", "tr": "Gaziantep" },
+      "country": { "en": "Türkiye", "tr": "Türkiye" }
+    },
+    {
+      "lat": 37.0,
+      "lon": 35.3213,
+      "city": { "en": "Adana", "tr": "Adana" },
+      "country": { "en": "Türkiye", "tr": "Türkiye" }
+    }
+  ]
+}

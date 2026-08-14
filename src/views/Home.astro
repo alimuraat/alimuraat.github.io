@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import BootTerminal from '../components/BootTerminal.astro';
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = site.pages.home;
+---
+
+<Base
+  lang={lang}
+  title={t(page.title, lang)}
+  description={t(page.description, lang)}
+  ogDescription={t(page.ogDescription, lang)}
+  backdrop="mesh"
+>
+  <section class="hero">
+    <p class="eyebrow">{t(page.eyebrow, lang)}</p>
+    <GlitchTitle text={page.heading} as="h1" size="h1" />
+
+    <div class="roles">
+      {
+        site.heroRoles.map((r) => (
+          <div>
+            {t(r.lead, lang)} <span>{t(r.tail, lang)}</span>
+          </div>
+        ))
+      }
+    </div>
+
+    <BootTerminal lang={lang} />
+
+    <nav class="cta" aria-label={t(ui.ctaAriaProfiles, lang)}>
+      <a href={site.links.github} target="_blank" rel="noopener">{t(ui.cta.github, lang)}</a>
+      <a href={site.links.linkedin} target="_blank" rel="noopener">{t(ui.cta.linkedin, lang)}</a>
+      <a href={`mailto:${site.links.email}`}>{t(ui.cta.email, lang)}</a>
+    </nav>
+  </section>
+</Base>

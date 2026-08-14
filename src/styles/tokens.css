@@ -1,0 +1,23 @@
+/* Design tokens. Nothing here is per-page — every value the site uses lives in
+   this file so the palette can never drift between components. */
+:root {
+  --bg: #070708;
+  --bg-elev: #0e0e11;
+  --line: #1b1b20;
+  --line-hot: #2a2a32;
+
+  --ink: #ececed;
+  --ink-dim: #8a8a93;
+  --ink-faint: #55555e;
+
+  --sig: #ff3344;      /* signal red — primary accent, never a fill */
+  --sig-deep: #7a0f1c; /* glow / depth */
+  --warn: #f0a020;     /* medium severity */
+  --cool: #3aa0ff;     /* glitch third layer + info label only */
+
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+
+  --pad: clamp(20px, 5vw, 80px);
+  --wrap: 1180px;
+}

@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import CertChip from '../components/CertChip.astro';
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import creds from '../data/certifications.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = site.pages.certifications;
+---
+
+<Base
+  lang={lang}
+  title={t(page.title, lang)}
+  description={t(page.description, lang)}
+  backdrop="orbit"
+>
+  <section>
+    <p class="eyebrow">{t(page.eyebrow, lang)}</p>
+    <GlitchTitle text={t(page.heading, lang)} />
+    <p class="lede">{t(page.lede, lang)}</p>
+
+    <ul class="chips">
+      {
+        creds.certifications.map((c) => (
+          <CertChip label={t(c.label, lang)} detail={t(c.detail, lang)} />
+        ))
+      }
+    </ul>
+
+    <h2 class="sub">{t(ui.education, lang)}</h2>
+    <ul class="stack-list">
+      {
+        creds.education.map((e) => (
+          <li>
+            <span class="k">{e.when}</span>
+            <span class="v">
+              <b>{t(e.degree, lang)}</b> — {t(e.school, lang)}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2 class="sub">{t(ui.languages, lang)}</h2>
+    <ul class="stack-list">
+      {
+        creds.languages.map((l) => (
+          <li>
+            <span class="k">{t(l.name, lang)}</span>
+            <span class="v">{t(l.level, lang)}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>

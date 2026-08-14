@@ -1,0 +1,5 @@
+Contact: mailto:security@alimurattava.com
+Contact: https://linkedin.com/in/alimurattava
+Preferred-Languages: tr, en
+Canonical: https://alimuraat.github.io/.well-known/security.txt
+Expires: 2027-01-01T00:00:00.000Z

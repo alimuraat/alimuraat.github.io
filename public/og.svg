@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#ff3344" stop-opacity=".2"/>
+      <stop offset="100%" stop-color="#ff3344" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse">
+      <path d="M46 0H0V46" fill="none" stroke="#1b1b20" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#070708"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity=".7"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect x="96" y="84" width="120" height="56" fill="none" stroke="#1b1b20"/>
+  <text x="112" y="123" font-family="JetBrains Mono, monospace" font-weight="700" font-size="30" fill="#ececed" letter-spacing="4">AMT</text>
+  <text x="96" y="262" font-family="JetBrains Mono, monospace" font-weight="700" font-size="76" fill="#ececed" letter-spacing="-2">Ali Murat Tava</text>
+  <text x="96" y="332" font-family="JetBrains Mono, monospace" font-size="27" fill="#ff3344" letter-spacing="2">Senior Cyber Security Engineer</text>
+  <text x="96" y="388" font-family="IBM Plex Sans, sans-serif" font-size="23" fill="#8a8a93">Offensive security · Application security · Security governance</text>
+  <text x="96" y="428" font-family="IBM Plex Sans, sans-serif" font-size="23" fill="#8a8a93">Istanbul, Türkiye</text>
+  <rect x="96" y="486" width="420" height="3" fill="#ff3344"/>
+  <text x="96" y="540" font-family="JetBrains Mono, monospace" font-size="20" fill="#55555e" letter-spacing="3">ALIMURATTAVA.COM</text>
+  <rect x="0.5" y="0.5" width="1199" height="629" fill="none" stroke="#1b1b20"/>
+</svg>

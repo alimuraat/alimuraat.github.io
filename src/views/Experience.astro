@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import RoadStop from '../components/RoadStop.astro';
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import experience from '../data/experience.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = site.pages.experience;
+---
+
+<Base
+  lang={lang}
+  title={t(page.title, lang)}
+  description={t(page.description, lang)}
+  backdrop="route"
+>
+  <section>
+    <p class="eyebrow">{t(page.eyebrow, lang)}</p>
+    <GlitchTitle text={t(page.heading, lang)} />
+    <p class="lede">{t(page.lede, lang)}</p>
+
+    <div class="road-wrap" role="group" aria-label={t(ui.roadAria, lang)}>
+      <p class="road-cap is-now" aria-hidden="true"><i></i>{t(ui.roadNow, lang)}</p>
+
+      <ol class="road">
+        {
+          experience.map((job, i) => (
+            <RoadStop
+              when={t(job.when, lang)}
+              role={t(job.role, lang)}
+              org={job.org}
+              summary={t(job.summary, lang)}
+              bullets={t(job.bullets, lang)}
+              levelUp={job.levelUp}
+              levelUpLabel={t(ui.levelUp, lang)}
+              current={i === 0}
+            />
+          ))
+        }
+      </ol>
+
+      <p class="road-cap is-start" aria-hidden="true"><i></i>{t(ui.roadStart, lang)}</p>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,75 @@
+{
+  "skip": { "en": "SKIP TO CONTENT", "tr": "İÇERİĞE ATLA" },
+  "navAria": { "en": "Primary", "tr": "Ana menü" },
+  "langAria": { "en": "Language", "tr": "Dil" },
+  "status": { "en": "ALL SYSTEMS OPERATIONAL", "tr": "TÜM SİSTEMLER ÇALIŞIYOR" },
+  "footer": {
+    "en": "© 2026 Ali Murat Tava · Istanbul, Türkiye · All systems operational.",
+    "tr": "© 2026 Ali Murat Tava · İstanbul, Türkiye · Tüm sistemler çalışıyor."
+  },
+  "ogAlt": {
+    "en": "Ali Murat Tava — Senior Cyber Security Engineer, Istanbul",
+    "tr": "Ali Murat Tava — Kıdemli Siber Güvenlik Mühendisi, İstanbul"
+  },
+
+  "levelUp": { "en": "▲ LEVEL UP", "tr": "▲ LEVEL UP" },
+  "roadNow": { "en": "NOW", "tr": "ŞİMDİ" },
+  "roadStart": { "en": "START", "tr": "BAŞLANGIÇ" },
+  "roadAria": { "en": "Career roadmap", "tr": "Kariyer yol haritası" },
+
+  "severity": {
+    "CVE": { "en": "CVE", "tr": "CVE" },
+    "HIGH": { "en": "HIGH", "tr": "YÜKSEK" },
+    "MEDIUM": { "en": "MEDIUM", "tr": "ORTA" },
+    "INFO": { "en": "INFO", "tr": "BİLGİ" }
+  },
+  "researchNote": {
+    "en": "Reports go to the vendor first, or through the national CVE program where one applies. Nothing here names a product, an endpoint or a payload before the fix is out.",
+    "tr": "Bildirimler önce üreticiye, uygun durumlarda ulusal CVE programı üzerinden gider. Düzeltme yayınlanmadan önce burada hiçbir ürün, uç nokta veya payload adı geçmez."
+  },
+
+  "education": { "en": "Education", "tr": "Eğitim" },
+  "languages": { "en": "Languages", "tr": "Diller" },
+
+  "where": { "en": "Where", "tr": "Nereler" },
+  "cities": { "en": "cities", "tr": "şehir" },
+  "countries": { "en": "countries", "tr": "ülke" },
+  "mapCaption": {
+    "en": "Hover a marker for the city. Equirectangular projection, 110m coastline.",
+    "tr": "Şehir adı için işaretin üzerine gelin. Eşdikdörtgen projeksiyon, 110m kıyı şeridi."
+  },
+
+  "contactKeys": {
+    "general": { "en": "GENERAL", "tr": "GENEL" },
+    "security": { "en": "SECURITY", "tr": "GÜVENLİK" },
+    "linkedin": { "en": "LINKEDIN", "tr": "LINKEDIN" },
+    "github": { "en": "GITHUB", "tr": "GITHUB" }
+  },
+  "securityLine": {
+    "en": "vulnerability reports",
+    "tr": "zafiyet bildirimleri"
+  },
+  "contactNote": {
+    "en": "Reporting something you found here or in anything I maintain? Send it to the security address; disclosure details are in",
+    "tr": "Burada ya da sürdürdüğüm bir şeyde bir bulgu mu var? Güvenlik adresine gönderin; bildirim detayları şurada:"
+  },
+
+  "cta": {
+    "github": { "en": "GITHUB", "tr": "GITHUB" },
+    "linkedin": { "en": "LINKEDIN", "tr": "LINKEDIN" },
+    "email": { "en": "EMAIL", "tr": "E-POSTA" },
+    "securityTxt": { "en": "SECURITY.TXT", "tr": "SECURITY.TXT" }
+  },
+  "ctaAriaProfiles": { "en": "Profiles", "tr": "Profiller" },
+  "ctaAriaContact": { "en": "Contact channels", "tr": "İletişim kanalları" },
+
+  "notFound": {
+    "code": "404",
+    "heading": { "en": "NOT FOUND", "tr": "BULUNAMADI" },
+    "body": {
+      "en": "That page is not here. It either moved or never existed.",
+      "tr": "Bu sayfa burada değil. Ya taşındı ya da hiç var olmadı."
+    },
+    "home": { "en": "HOME", "tr": "ANASAYFA" }
+  }
+}

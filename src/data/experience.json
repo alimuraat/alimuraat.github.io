@@ -1,0 +1,115 @@
+[
+  {
+    "org": "Borusan Otomotiv Grubu",
+    "levelUp": true,
+    "when": { "en": "Jan 2024 — Present", "tr": "Oca 2024 — Halen" },
+    "role": {
+      "en": "Senior Cyber Security Engineer",
+      "tr": "Kıdemli Siber Güvenlik Mühendisi"
+    },
+    "summary": {
+      "en": "Leading all cybersecurity and information security processes; primary security contact for BMW and Jaguar Land Rover Türkiye operations.",
+      "tr": "Tüm siber güvenlik ve bilgi güvenliği süreçlerini yürütüyorum; BMW ve Jaguar Land Rover Türkiye operasyonlarının birincil güvenlik muhatabıyım."
+    },
+    "bullets": {
+      "en": [
+        "Hands-on web, API and mobile penetration testing across Borusan Otomotiv, BMW and JLR Türkiye environments.",
+        "Own the ISO 27001 ISMS end to end — took three group companies and ten branches through certification.",
+        "Coordinate vendor-led penetration tests: scope, execution alignment, report quality, remediation follow-up.",
+        "Run the vulnerability management lifecycle with risk-based prioritization alongside application and system owners.",
+        "Built the AI governance program: generative AI usage policy and ISO/IEC 42001 certification track.",
+        "Drive awareness programs, phishing simulations and third-party security assessments including contract security review."
+      ],
+      "tr": [
+        "Borusan Otomotiv, BMW ve JLR Türkiye ortamlarında uygulamalı web, API ve mobil sızma testleri.",
+        "ISO 27001 BGYS'nin uçtan uca sahibiyim — üç grup şirketini ve on şubeyi sertifikasyona taşıdım.",
+        "Tedarikçi sızma testlerinin koordinasyonu: kapsam, icra uyumu, rapor kalitesi, düzeltme takibi.",
+        "Uygulama ve sistem sahipleriyle birlikte, risk odaklı önceliklendirmeyle zafiyet yönetimi döngüsünü yürütüyorum.",
+        "Yapay zeka yönetişim programını kurdum: üretken yapay zeka kullanım politikası ve ISO/IEC 42001 sertifikasyon süreci.",
+        "Farkındalık programları, oltalama simülasyonları ve sözleşme güvenlik incelemesi dahil üçüncü taraf güvenlik değerlendirmeleri."
+      ]
+    }
+  },
+  {
+    "org": "PwC",
+    "levelUp": true,
+    "when": { "en": "Sep 2022 — Dec 2023", "tr": "Eyl 2022 — Ara 2023" },
+    "role": {
+      "en": "Offensive Cyber Security Consultant",
+      "tr": "Ofansif Siber Güvenlik Danışmanı"
+    },
+    "summary": {
+      "en": "Offensive security engagements for 20+ enterprise clients across finance, energy, retail and technology.",
+      "tr": "Finans, enerji, perakende ve teknoloji sektörlerinde 20+ kurumsal müşteri için ofansif güvenlik projeleri."
+    },
+    "bullets": {
+      "en": [
+        "Owned the full offensive security program for a global energy client for one year — testing, phishing, remediation, re-test, closure.",
+        "Designed and built a DDoS attack simulation platform, delivered from PwC Türkiye to global clients across the network.",
+        "Delivered BDDK-compliant penetration testing for banking clients with full methodological alignment.",
+        "Web, API and mobile application testing plus wireless and internal network assessments.",
+        "Led junior consultants: scoping, methodology, findings review, deliverable QA."
+      ],
+      "tr": [
+        "Küresel bir enerji müşterisinin ofansif güvenlik programını bir yıl boyunca uçtan uca yürüttüm — test, oltalama, düzeltme, yeniden test, kapanış.",
+        "DDoS saldırı simülasyon platformunu tasarlayıp geliştirdim; PwC Türkiye üzerinden global müşterilere sunuldu.",
+        "Bankacılık müşterileri için metodolojik uyumu tam, BDDK uyumlu sızma testleri.",
+        "Web, API ve mobil uygulama testlerinin yanında kablosuz ve iç ağ değerlendirmeleri.",
+        "Junior danışmanları yönettim: kapsamlama, metodoloji, bulgu incelemesi, çıktı kalite kontrolü."
+      ]
+    }
+  },
+  {
+    "org": "Teknasyon",
+    "levelUp": false,
+    "when": { "en": "Dec 2021 — Sep 2022", "tr": "Ara 2021 — Eyl 2022" },
+    "role": { "en": "Cyber Security Engineer", "tr": "Siber Güvenlik Mühendisi" },
+    "summary": {
+      "en": "Secured a product ecosystem of 50+ mobile apps with 100M+ downloads on 150+ AWS EC2 instances.",
+      "tr": "150+ AWS EC2 sunucusu üzerinde çalışan, 100M+ indirmeye sahip 50+ mobil uygulamalık ürün ekosisteminin güvenliği."
+    },
+    "bullets": {
+      "en": [
+        "Achieved shift-left coverage for 70% of newly added features in the SDLC.",
+        "Improved project security posture by 80% and cut AWS infrastructure security issues by 60% after a cloud security audit.",
+        "Embedded security into the SDLC via secure coding challenge days, code review sessions and CI/CD security automation.",
+        "Supported the company through ISO 27001:2013 certification."
+      ],
+      "tr": [
+        "SDLC'ye eklenen yeni özelliklerin %70'inde shift-left kapsaması sağladım.",
+        "Bulut güvenlik denetimi sonrası proje güvenlik seviyesini %80 iyileştirdim, AWS altyapı güvenlik bulgularını %60 azalttım.",
+        "Güvenli kodlama günleri, kod inceleme oturumları ve CI/CD güvenlik otomasyonuyla güvenliği SDLC'ye gömdüm.",
+        "Şirketin ISO 27001:2013 sertifikasyon sürecini destekledim."
+      ]
+    }
+  },
+  {
+    "org": "Sorgu Teknoloji",
+    "levelUp": false,
+    "when": { "en": "Mar 2021 — May 2021", "tr": "Mar 2021 — May 2021" },
+    "role": { "en": "System Engineer", "tr": "Sistem Mühendisi" },
+    "summary": {
+      "en": "Core IT infrastructure and security tooling.",
+      "tr": "Temel BT altyapısı ve güvenlik araçları."
+    },
+    "bullets": {
+      "en": [
+        "Virtualization, monitoring, network security, intrusion detection, centralized log and identity management."
+      ],
+      "tr": [
+        "Sanallaştırma, izleme, ağ güvenliği, saldırı tespiti, merkezi log ve kimlik yönetimi."
+      ]
+    }
+  },
+  {
+    "org": "Flokser",
+    "levelUp": false,
+    "when": { "en": "Sep 2017 — Aug 2018", "tr": "Eyl 2017 — Ağu 2018" },
+    "role": { "en": "Information Technology Intern", "tr": "Bilgi Teknolojileri Stajyeri" },
+    "summary": {
+      "en": "First IT role — started programming at 14, moved from software development into security.",
+      "tr": "İlk BT rolüm — 14 yaşında programlamaya başladım, yazılım geliştirmeden güvenliğe geçtim."
+    },
+    "bullets": { "en": [], "tr": [] }
+  }
+]

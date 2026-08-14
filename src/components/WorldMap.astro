@@ -1,0 +1,55 @@
+---
+/**
+ * Inline SVG world map with a radar ping on every visited city.
+ *
+ * The coastline is a single path baked by scripts/make-worldmap.mjs; the pins
+ * are projected here with the same equirectangular arithmetic. No map library,
+ * no tiles, no runtime JS — the pulse is a CSS animation on the circle's r.
+ *
+ * The SVG is aria-hidden on purpose: the same places are listed as text below
+ * it on the page, which is the version worth reading aloud.
+ */
+import world from '../data/world-path.json';
+import data from '../data/places.json';
+import ui from '../data/ui.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const x = (lon: number) => ((lon + 180) / 360) * world.width;
+const y = (lat: number) => ((90 - lat) / 180) * world.height;
+
+/* Five stagger buckets, applied as a class — a per-pin animation-delay would
+   need an inline style attribute, which the CSP does not allow. */
+const pins = data.places.map((p, i) => ({
+  city: t(p.city, lang),
+  px: Math.round(x(p.lon) * 10) / 10,
+  py: Math.round(y(p.lat) * 10) / 10,
+  bucket: i % 5,
+}));
+---
+
+<figure class="map">
+  <div class="map-wrap">
+    <svg class="worldmap" viewBox={world.viewBox} aria-hidden="true">
+      <path class="land" d={world.d} />
+      {
+        pins.map((p) => (
+          <g class:list={['pin', `b${p.bucket}`]} transform={`translate(${p.px} ${p.py})`}>
+            <circle class="ping" r="2" />
+            <circle class="core" r="1.7" />
+            <circle class="hit" r="9" />
+            <text class="lbl" x="11" y="3.5">
+              {p.city}
+            </text>
+          </g>
+        ))
+      }
+    </svg>
+  </div>
+  <figcaption>{t(ui.mapCaption, lang)}</figcaption>
+</figure>

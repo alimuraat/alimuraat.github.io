@@ -1,0 +1,56 @@
+{
+  "_contract": "DISCLOSURE GUARD — when published is false, FindingRow renders ONLY title, state and embargoNote. The vendor, detail and url fields are never emitted into the HTML, so an embargoed record cannot leak a vendor name through an accidental edit. `published`, `severity` and `id` are deliberately NOT translatable: one flag, one value, both languages. Flip published to true only after the record is public (nvd.nist.gov / cve.org), then fill vendor, detail and url.",
+  "findings": [
+    {
+      "id": "CVE-2026-18205",
+      "severity": "CVE",
+      "published": false,
+      "title": {
+        "en": "CVE-2026-18205 — CWE-79 Cross-site Scripting",
+        "tr": "CVE-2026-18205 — CWE-79 Siteler Arası Betik Çalıştırma"
+      },
+      "state": { "en": "RESERVED / PENDING FIX", "tr": "REZERVE / DÜZELTME BEKLENİYOR" },
+      "embargoNote": {
+        "en": "Platform-level reflected XSS in a commercial e-commerce platform, affecting every tenant on the product. Reported through the Turkish national CVE program (Cumhurbaşkanlığı Siber Güvenlik Başkanlığı). Vendor and technical detail withheld until remediation.",
+        "tr": "Ticari bir e-ticaret platformunda, üründeki tüm kiracıları etkileyen platform seviyesinde yansıtılmış XSS. Türkiye ulusal CVE programı (Cumhurbaşkanlığı Siber Güvenlik Başkanlığı) üzerinden bildirildi. Üretici ve teknik detay, düzeltme yapılana kadar paylaşılmıyor."
+      },
+      "vendor": null,
+      "detail": null,
+      "url": null
+    },
+    {
+      "id": "llm-system-prompt-disclosure",
+      "severity": "HIGH",
+      "published": true,
+      "title": {
+        "en": "LLM assistant — system prompt disclosure",
+        "tr": "LLM asistanı — sistem promptu ifşası"
+      },
+      "state": { "en": "REMEDIATED", "tr": "GİDERİLDİ" },
+      "embargoNote": null,
+      "vendor": null,
+      "detail": {
+        "en": "Prompt injection assessment against an enterprise AI assistant; system prompt leakage and privilege boundary bypass among seven findings.",
+        "tr": "Kurumsal bir yapay zeka asistanına karşı prompt injection değerlendirmesi; yedi bulgu arasında sistem promptu sızıntısı ve yetki sınırı aşımı."
+      },
+      "url": null
+    },
+    {
+      "id": "session-fixation-identifier-leakage",
+      "severity": "MEDIUM",
+      "published": true,
+      "title": {
+        "en": "Session fixation & identifier leakage",
+        "tr": "Oturum sabitleme & tanımlayıcı sızıntısı"
+      },
+      "state": { "en": "REMEDIATED", "tr": "GİDERİLDİ" },
+      "embargoNote": null,
+      "vendor": null,
+      "detail": {
+        "en": "Session management weaknesses including session ID exposure through a third-party tracking pixel.",
+        "tr": "Üçüncü taraf bir takip pikseli üzerinden oturum kimliğinin dışarı sızması dahil oturum yönetimi zafiyetleri."
+      },
+      "url": null
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+---
+/**
+ * Static 404. Cloudflare Pages serves dist/404.html for any unknown path,
+ * including under /tr/, so this page is bilingual rather than per-locale.
+ */
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import ui from '../data/ui.json';
+
+const nf = ui.notFound;
+---
+
+<Base
+  lang="en"
+  title="404 — Not Found | Ali Murat Tava"
+  description="That page does not exist on alimurattava.com."
+  backdrop="scan"
+  noindex
+>
+  <section class="hero">
+    <p class="eyebrow">{nf.code}</p>
+    <GlitchTitle text={nf.heading.en} size="h1" />
+    <p class="lede">{nf.body.en}</p>
+    <p class="lede">{nf.body.tr}</p>
+
+    <nav class="cta" aria-label="Home">
+      <a href="/">{nf.home.en}</a>
+      <a href="/tr/">{nf.home.tr}</a>
+    </nav>
+  </section>
+</Base>

@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import FindingRow from '../components/FindingRow.astro';
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import research from '../data/research.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = site.pages.research;
+const severity = ui.severity as Record<string, { en: string; tr?: string }>;
+---
+
+<Base lang={lang} title={t(page.title, lang)} description={t(page.description, lang)} backdrop="scan">
+  <section>
+    <p class="eyebrow">{t(page.eyebrow, lang)}</p>
+    <GlitchTitle text={t(page.heading, lang)} />
+    <p class="lede">{t(page.lede, lang)}</p>
+
+    <div class="rows">
+      {
+        research.findings.map((f) => (
+          <FindingRow
+            severity={f.severity}
+            severityLabel={severity[f.severity] ? t(severity[f.severity], lang) : f.severity}
+            title={t(f.title, lang)}
+            state={t(f.state, lang)}
+            published={f.published}
+            embargoNote={f.embargoNote ? t(f.embargoNote, lang) : null}
+            vendor={f.vendor}
+            detail={f.detail ? t(f.detail, lang) : null}
+            url={f.url}
+          />
+        ))
+      }
+    </div>
+
+    <p class="note">{t(ui.researchNote, lang)}</p>
+  </section>
+</Base>

@@ -1,0 +1,142 @@
+{
+  "name": "Ali Murat Tava",
+  "initials": "AMT",
+  "links": {
+    "github": "https://github.com/alimuraat",
+    "linkedin": "https://linkedin.com/in/alimurattava",
+    "email": "contact@alimurattava.com",
+    "securityEmail": "security@alimurattava.com",
+    "securityTxt": "/.well-known/security.txt"
+  },
+  "nav": [
+    { "href": "/", "label": { "en": "HOME", "tr": "ANASAYFA" } },
+    { "href": "/experience/", "label": { "en": "EXPERIENCE", "tr": "DENEYİM" } },
+    { "href": "/research/", "label": { "en": "RESEARCH", "tr": "ARAŞTIRMA" } },
+    { "href": "/projects/", "label": { "en": "PROJECTS", "tr": "PROJELER" } },
+    { "href": "/certifications/", "label": { "en": "CERTIFICATIONS", "tr": "SERTİFİKALAR" } },
+    { "href": "/travel/", "label": { "en": "TRAVEL", "tr": "SEYAHAT" } },
+    { "href": "/contact/", "label": { "en": "CONTACT", "tr": "İLETİŞİM" } }
+  ],
+  "heroRoles": [
+    {
+      "lead": { "en": "Senior Cyber Security Engineer", "tr": "Kıdemli Siber Güvenlik Mühendisi" },
+      "tail": { "en": "— Borusan Otomotiv Grubu", "tr": "— Borusan Otomotiv Grubu" }
+    },
+    {
+      "lead": {
+        "en": "Offensive Security · Application Security",
+        "tr": "Ofansif Güvenlik · Uygulama Güvenliği"
+      },
+      "tail": { "en": "— web, API, mobile", "tr": "— web, API, mobil" }
+    },
+    {
+      "lead": { "en": "Security Governance", "tr": "Güvenlik Yönetişimi" },
+      "tail": {
+        "en": "— ISO 27001 & ISO/IEC 42001 Lead Auditor",
+        "tr": "— ISO 27001 & ISO/IEC 42001 Baş Denetçi"
+      }
+    }
+  ],
+  "pages": {
+    "home": {
+      "title": {
+        "en": "Ali Murat Tava | Senior Cyber Security Engineer",
+        "tr": "Ali Murat Tava | Kıdemli Siber Güvenlik Mühendisi"
+      },
+      "description": {
+        "en": "Ali Murat Tava — Senior Cyber Security Engineer in Istanbul. Offensive security, application security and security governance. CVE-2026-18205.",
+        "tr": "Ali Murat Tava — İstanbul'da kıdemli siber güvenlik mühendisi. Ofansif güvenlik, uygulama güvenliği ve güvenlik yönetişimi. CVE-2026-18205."
+      },
+      "ogDescription": {
+        "en": "Offensive security, application security and security governance. Istanbul, Türkiye.",
+        "tr": "Ofansif güvenlik, uygulama güvenliği ve güvenlik yönetişimi. İstanbul, Türkiye."
+      },
+      "eyebrow": { "en": "whoami", "tr": "whoami" },
+      "heading": "Ali Murat Tava"
+    },
+    "experience": {
+      "title": { "en": "Experience | Ali Murat Tava", "tr": "Deneyim | Ali Murat Tava" },
+      "description": {
+        "en": "Five years of security work at Borusan Otomotiv Grubu, PwC, Teknasyon and Sorgu Teknoloji — penetration testing, application security and ISO 27001 governance.",
+        "tr": "Borusan Otomotiv Grubu, PwC, Teknasyon ve Sorgu Teknoloji'de beş yıllık güvenlik çalışması — sızma testi, uygulama güvenliği ve ISO 27001 yönetişimi."
+      },
+      "eyebrow": { "en": "roadmap", "tr": "yol haritası" },
+      "heading": { "en": "EXPERIENCE", "tr": "DENEYİM" },
+      "lede": {
+        "en": "Five years across offensive security, application security and governance — from securing a 100M-download mobile ecosystem to running an enterprise ISMS. Read it bottom to top; that is the order it happened in.",
+        "tr": "Ofansif güvenlik, uygulama güvenliği ve yönetişim üzerine beş yıl — 100 milyon indirmeli bir mobil ekosistemi korumaktan kurumsal bir BGYS işletmeye. Aşağıdan yukarı okuyun; olay sırası o yönde."
+      }
+    },
+    "research": {
+      "title": {
+        "en": "Research & Disclosure | Ali Murat Tava",
+        "tr": "Araştırma & Bildirim | Ali Murat Tava"
+      },
+      "description": {
+        "en": "Coordinated vulnerability disclosure by Ali Murat Tava, including CVE-2026-18205 (CWE-79) reported through the Turkish national CVE program.",
+        "tr": "Ali Murat Tava'nın koordineli zafiyet bildirimleri; ulusal CVE programı üzerinden bildirilen CVE-2026-18205 (CWE-79) dahil."
+      },
+      "eyebrow": { "en": "research & disclosure", "tr": "araştırma & bildirim" },
+      "heading": { "en": "RESEARCH", "tr": "ARAŞTIRMA" },
+      "lede": {
+        "en": "Coordinated disclosure only. Vendor details and technical specifics are withheld until the vendor ships a fix and the record is published.",
+        "tr": "Yalnızca koordineli bildirim. Üretici adı ve teknik detaylar, düzeltme yayınlanıp kayıt açılana kadar paylaşılmaz."
+      }
+    },
+    "projects": {
+      "title": { "en": "Projects | Ali Murat Tava", "tr": "Projeler | Ali Murat Tava" },
+      "description": {
+        "en": "Security work that can be described publicly: a DDoS simulation platform, an AI-assisted pentest methodology, an ISO/IEC 42001 AI governance program and CI/CD security automation.",
+        "tr": "Kamuya açık anlatılabilen çalışmalar: DDoS simülasyon platformu, yapay zeka destekli sızma testi metodolojisi, ISO/IEC 42001 yapay zeka yönetişim programı ve CI/CD güvenlik otomasyonu."
+      },
+      "eyebrow": { "en": "projects", "tr": "projeler" },
+      "heading": { "en": "PROJECTS", "tr": "PROJELER" },
+      "lede": {
+        "en": "Most of my work is the intellectual property of current or former employers. These are the ones I can describe publicly.",
+        "tr": "Yaptığım işlerin çoğu mevcut veya eski işverenlerimin fikri mülkiyeti. Bunlar kamuya açık anlatabildiklerim."
+      }
+    },
+    "certifications": {
+      "title": {
+        "en": "Certifications & Education | Ali Murat Tava",
+        "tr": "Sertifikalar & Eğitim | Ali Murat Tava"
+      },
+      "description": {
+        "en": "eWAPTXv2, ISO/IEC 42001:2023 and ISO/IEC 27001:2022 Lead Auditor, AWS Community Builder, CS50 — with education and languages.",
+        "tr": "eWAPTXv2, ISO/IEC 42001:2023 ve ISO/IEC 27001:2022 Baş Denetçi, AWS Community Builder, CS50 — eğitim ve diller ile birlikte."
+      },
+      "eyebrow": { "en": "certifications", "tr": "sertifikalar" },
+      "heading": { "en": "CREDENTIALS", "tr": "YETKİNLİKLER" },
+      "lede": {
+        "en": "Offensive security certification alongside the audit credentials behind the governance work — plus the education that led there.",
+        "tr": "Yönetişim tarafındaki denetçi sertifikalarının yanında ofansif güvenlik sertifikası — ve buraya götüren eğitim."
+      }
+    },
+    "travel": {
+      "title": { "en": "Travel | Ali Murat Tava", "tr": "Seyahat | Ali Murat Tava" },
+      "description": {
+        "en": "Cities Ali Murat Tava has been to — Japan, Italy, Spain, France, Germany, the Netherlands, Vatican City and across Türkiye, on a radar-style world map.",
+        "tr": "Ali Murat Tava'nın gittiği şehirler — Japonya, İtalya, İspanya, Fransa, Almanya, Hollanda, Vatikan ve Türkiye genelinde, radar tarzı bir dünya haritasında."
+      },
+      "eyebrow": { "en": "travel", "tr": "seyahat" },
+      "heading": { "en": "TRAVEL", "tr": "SEYAHAT" },
+      "lede": {
+        "en": "Every marker is somewhere I have actually been. The map is drawn from a coordinate list rather than a mood board, so it stays honest as it grows.",
+        "tr": "Her işaret gerçekten gittiğim bir yer. Harita bir koordinat listesinden çiziliyor, o yüzden büyüdükçe de dürüst kalıyor."
+      }
+    },
+    "contact": {
+      "title": { "en": "Contact | Ali Murat Tava", "tr": "İletişim | Ali Murat Tava" },
+      "description": {
+        "en": "Get in touch with Ali Murat Tava about offensive security, application security or building a security program from zero. Encrypted mail preferred.",
+        "tr": "Ofansif güvenlik, uygulama güvenliği veya sıfırdan güvenlik programı kurma konularında Ali Murat Tava ile iletişime geçin. Şifreli e-posta tercih edilir."
+      },
+      "eyebrow": { "en": "contact", "tr": "iletişim" },
+      "heading": { "en": "GET IN TOUCH", "tr": "İLETİŞİM" },
+      "lede": {
+        "en": "Offensive security, application security or building a security program from zero — happy to talk. Vulnerability reports go to the security address; ask there if you want a PGP key.",
+        "tr": "Ofansif güvenlik, uygulama güvenliği ya da sıfırdan bir güvenlik programı kurmak — konuşmaktan memnuniyet duyarım. Zafiyet bildirimleri güvenlik adresine gider; PGP anahtarı isterseniz oradan yazın."
+      }
+    }
+  }
+}

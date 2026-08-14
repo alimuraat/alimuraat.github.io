@@ -1,0 +1,51 @@
+---
+/**
+ * One stop on the career roadmap: a node on the rail, then the role.
+ *
+ * `current` lights the node red and turns the rail below it into a gradient,
+ * so the eye starts at "now" and follows the route down into the past.
+ */
+interface Props {
+  when: string;
+  role: string;
+  org: string;
+  summary: string;
+  bullets?: string[];
+  levelUp?: boolean;
+  levelUpLabel?: string;
+  current?: boolean;
+}
+
+const {
+  when,
+  role,
+  org,
+  summary,
+  bullets = [],
+  levelUp = false,
+  levelUpLabel = '▲ LEVEL UP',
+  current = false,
+} = Astro.props;
+---
+
+<li class:list={['stop', current && 'is-current']}>
+  <div class="mark" aria-hidden="true"></div>
+  <div class="body">
+    <p class="when">
+      {when}
+      {levelUp && <span class="tag">{levelUpLabel}</span>}
+    </p>
+    <h3 class="role">{role}</h3>
+    <div class="org">{org}</div>
+    <p class="sum">{summary}</p>
+    {
+      bullets.length > 0 && (
+        <ul>
+          {bullets.map((b) => (
+            <li>{b}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</li>

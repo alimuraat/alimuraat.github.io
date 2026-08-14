@@ -1,0 +1,63 @@
+---
+/**
+ * DISCLOSURE GUARD.
+ *
+ * `published: false` means the record is still under embargo. In that state
+ * this component renders the title, the state and the pre-cleared
+ * `embargoNote` — and nothing else. `vendor`, `detail` and `url` are not
+ * emitted into the HTML at all, so filling them in early cannot leak a vendor
+ * name before the fix ships. Flip `published` to true in
+ * src/data/research.json once the record is public.
+ */
+interface Props {
+  /** Untranslated key — drives the colour. */
+  severity: string;
+  /** Translated text for the badge. */
+  severityLabel?: string;
+  title: string;
+  state: string;
+  published?: boolean;
+  embargoNote?: string | null;
+  vendor?: string | null;
+  detail?: string | null;
+  url?: string | null;
+}
+
+const {
+  severity,
+  severityLabel = severity,
+  title,
+  state,
+  published = false,
+  embargoNote = null,
+  vendor = null,
+  detail = null,
+  url = null,
+} = Astro.props;
+
+const sevClass =
+  severity === 'MEDIUM' ? 'med' : severity === 'INFO' ? 'info' : 'high';
+
+/* Everything below is gated on `published`. */
+const body = published ? [vendor, detail].filter(Boolean).join(' — ') : embargoNote;
+const link = published ? url : null;
+
+/* "RESERVED / PENDING FIX" prints as two lines on the right. */
+const stateLines = state.split('/').map((s) => s.trim()).filter(Boolean);
+---
+
+<div class="row">
+  <span class:list={['sev', sevClass]}>{severityLabel}</span>
+  <div class="what">
+    <strong>{title}</strong>
+    {body && <span>{body}</span>}
+    {link && (
+      <span>
+        <a href={link} rel="noopener" target="_blank">{link}</a>
+      </span>
+    )}
+  </div>
+  <div class="state">
+    {stateLines.map((line, i) => (<>{i > 0 && <br />}{line}</>))}
+  </div>
+</div>

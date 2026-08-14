@@ -1,0 +1,115 @@
+---
+import Nav from '../components/Nav.astro';
+import Backdrop from '../components/Backdrop.astro';
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import { t, basePath, OG_LOCALE, type Lang } from '../i18n';
+
+import '../styles/tokens.css';
+import '../styles/fonts.css';
+import '../styles/base.css';
+
+type BackdropVariant = 'mesh' | 'route' | 'scan' | 'drift' | 'orbit' | 'ripple' | 'none';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** Shorter copy for social cards; falls back to `description`. */
+  ogDescription?: string;
+  /** Which background animation this page runs — see Backdrop.astro. */
+  backdrop?: BackdropVariant;
+  /** Keeps a page out of search results and out of the alternates dance. */
+  noindex?: boolean;
+}
+
+const { lang, title, description, ogDescription, backdrop = 'mesh', noindex = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const bare = basePath(Astro.url.pathname);
+const altEn = new URL(bare, Astro.site).href;
+const altTr = new URL(`/tr${bare}`, Astro.site).href;
+const ogImage = new URL('/og.png', Astro.site).href;
+const social = ogDescription ?? description;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {
+      /* GitHub Pages cannot send response headers, so the policy rides in the
+         document instead. public/_headers still carries the full version —
+         including frame-ancestors and HSTS, which only work as headers — for a
+         host that can send them. Production only: the dev server needs its HMR
+         websocket and injects inline styles. */
+      import.meta.env.PROD && (
+        <meta
+          http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; script-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'"
+        />
+      )
+    }
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <meta name="theme-color" content="#070708" />
+    <meta name="color-scheme" content="dark" />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {
+      !noindex && (
+        <>
+          <link rel="alternate" hreflang="en" href={altEn} />
+          <link rel="alternate" hreflang="tr" href={altTr} />
+          <link rel="alternate" hreflang="x-default" href={altEn} />
+        </>
+      )
+    }
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <link
+      rel="preload"
+      href="/fonts/jetbrains-mono-latin-700-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/ibm-plex-sans-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={social} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={t(ui.ogAlt, lang)} />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={social} />
+    <meta name="twitter:image" content={ogImage} />
+  </head>
+
+  <body>
+    <a class="skip" href="#main">{t(ui.skip, lang)}</a>
+    <Backdrop variant={backdrop} />
+    <Nav lang={lang} />
+    <main id="main">
+      <slot />
+    </main>
+    <footer>{t(ui.footer, lang)}</footer>
+  </body>
+</html>

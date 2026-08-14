@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import site from '../data/site.json';
+import projects from '../data/projects.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = site.pages.projects;
+---
+
+<Base
+  lang={lang}
+  title={t(page.title, lang)}
+  description={t(page.description, lang)}
+  backdrop="drift"
+>
+  <section>
+    <p class="eyebrow">{t(page.eyebrow, lang)}</p>
+    <GlitchTitle text={t(page.heading, lang)} />
+    <p class="lede">{t(page.lede, lang)}</p>
+
+    <div class="grid">
+      {
+        projects.map((p) => (
+          <ProjectCard title={t(p.title, lang)} year={p.year} body={t(p.body, lang)} />
+        ))
+      }
+    </div>
+  </section>
+</Base>

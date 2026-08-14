@@ -1,0 +1,78 @@
+{
+  "certifications": [
+    {
+      "label": "eWAPTXv2",
+      "detail": {
+        "en": "Web Application Penetration Tester eXtreme · INE Security",
+        "tr": "Web Uygulaması Sızma Testi Uzmanı (eXtreme) · INE Security"
+      }
+    },
+    {
+      "label": "ISO/IEC 42001:2023",
+      "detail": {
+        "en": "AI Management System Lead Auditor",
+        "tr": "Yapay Zeka Yönetim Sistemi Baş Denetçisi"
+      }
+    },
+    {
+      "label": "ISO/IEC 27001:2022",
+      "detail": { "en": "ISMS Lead Auditor", "tr": "BGYS Baş Denetçisi" }
+    },
+    {
+      "label": "AWS Community Builder",
+      "detail": { "en": "Security & Identity", "tr": "Güvenlik & Kimlik" }
+    },
+    { "label": "CS50", "detail": { "en": "Harvard University", "tr": "Harvard Üniversitesi" } },
+    {
+      "label": "Introduction to Cybersecurity Tools & Cyber Attacks",
+      "detail": { "en": "IBM", "tr": "IBM" }
+    },
+    {
+      "label": { "en": "UAV Pilot", "tr": "İHA Pilotu" },
+      "detail": {
+        "en": "Unmanned Aerial Vehicle Certificate",
+        "tr": "İnsansız Hava Aracı Pilot Sertifikası"
+      }
+    }
+  ],
+  "education": [
+    {
+      "when": "2021 — 2025",
+      "degree": {
+        "en": "B.Sc. Management Information Systems",
+        "tr": "Lisans, Yönetim Bilişim Sistemleri"
+      },
+      "school": { "en": "Anadolu University", "tr": "Anadolu Üniversitesi" }
+    },
+    {
+      "when": "2019 — 2021",
+      "degree": {
+        "en": "Associate's Degree, Computer Programming",
+        "tr": "Ön Lisans, Bilgisayar Programcılığı"
+      },
+      "school": { "en": "İstinye University", "tr": "İstinye Üniversitesi" }
+    },
+    {
+      "when": "2014 — 2018",
+      "degree": { "en": "Web Programming", "tr": "Web Programcılığı" },
+      "school": {
+        "en": "Yıldız Technical University Maçka Technical High School",
+        "tr": "Yıldız Teknik Üniversitesi Maçka Teknik Lisesi"
+      }
+    }
+  ],
+  "languages": [
+    {
+      "name": { "en": "Turkish", "tr": "Türkçe" },
+      "level": { "en": "Native", "tr": "Ana dil" }
+    },
+    {
+      "name": { "en": "English", "tr": "İngilizce" },
+      "level": { "en": "Professional working", "tr": "Profesyonel çalışma seviyesi" }
+    },
+    {
+      "name": { "en": "Spanish", "tr": "İspanyolca" },
+      "level": { "en": "Elementary", "tr": "Başlangıç seviyesi" }
+    }
+  ]
+}

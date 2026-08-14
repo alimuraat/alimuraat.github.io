@@ -1,0 +1,37 @@
+[
+  {
+    "year": "2023",
+    "title": { "en": "DDoS Simulation Platform", "tr": "DDoS Simülasyon Platformu" },
+    "body": {
+      "en": "Designed and built a controlled DDoS attack simulation platform for client resilience testing. Run out of PwC Türkiye and delivered to global clients across the network.",
+      "tr": "Müşteri dayanıklılık testleri için kontrollü bir DDoS saldırı simülasyon platformu tasarlayıp geliştirdim. PwC Türkiye üzerinden yürütüldü ve global müşterilere sunuldu."
+    }
+  },
+  {
+    "year": "2026",
+    "title": {
+      "en": "AI-Assisted Pentest Methodology",
+      "tr": "Yapay Zeka Destekli Sızma Testi Metodolojisi"
+    },
+    "body": {
+      "en": "Repeatable web application testing workflow where LLM agents drive Burp Suite over MCP. Manual validation stays mandatory; the gain is coverage and speed, not autonomy.",
+      "tr": "LLM ajanlarının Burp Suite'i MCP üzerinden sürdüğü, tekrarlanabilir web uygulaması test akışı. Manuel doğrulama zorunlu kalıyor; kazanç kapsam ve hız, otonomi değil."
+    }
+  },
+  {
+    "year": "2026",
+    "title": { "en": "AI Governance Program", "tr": "Yapay Zeka Yönetişim Programı" },
+    "body": {
+      "en": "ISO/IEC 42001 aligned AI management system: usage policy, risk assessment, shadow AI detection and supplier controls.",
+      "tr": "ISO/IEC 42001 uyumlu yapay zeka yönetim sistemi: kullanım politikası, risk değerlendirmesi, gölge yapay zeka tespiti ve tedarikçi kontrolleri."
+    }
+  },
+  {
+    "year": "2022",
+    "title": { "en": "CI/CD Security Automation", "tr": "CI/CD Güvenlik Otomasyonu" },
+    "body": {
+      "en": "Pipeline security checks and secure coding programs that pulled 70% of new features into shift-left coverage across a 50-app mobile ecosystem.",
+      "tr": "50 uygulamalık mobil ekosistemde yeni özelliklerin %70'ini shift-left kapsamına alan pipeline güvenlik kontrolleri ve güvenli kodlama programları."
+    }
+  }
+]

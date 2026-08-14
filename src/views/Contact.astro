@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import GlitchTitle from '../components/GlitchTitle.astro';
+import site from '../data/site.json';
+import ui from '../data/ui.json';
+import { t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = site.pages.contact;
+const { links } = site;
+---
+
+<Base
+  lang={lang}
+  title={t(page.title, lang)}
+  description={t(page.description, lang)}
+  backdrop="ripple"
+>
+  <section>
+    <p class="eyebrow">{t(page.eyebrow, lang)}</p>
+    <GlitchTitle text={t(page.heading, lang)} />
+    <p class="lede">{t(page.lede, lang)}</p>
+
+    <ul class="stack-list">
+      <li>
+        <span class="k">{t(ui.contactKeys.general, lang)}</span>
+        <span class="v"><a href={`mailto:${links.email}`}>{links.email}</a></span>
+      </li>
+      <li>
+        <span class="k">{t(ui.contactKeys.security, lang)}</span>
+        <span class="v">
+          <a href={`mailto:${links.securityEmail}`}>{links.securityEmail}</a> — {
+            t(ui.securityLine, lang)
+          }
+        </span>
+      </li>
+      <li>
+        <span class="k">{t(ui.contactKeys.linkedin, lang)}</span>
+        <span class="v"
+          ><a href={links.linkedin} target="_blank" rel="noopener">linkedin.com/in/alimurattava</a
+          ></span
+        >
+      </li>
+      <li>
+        <span class="k">{t(ui.contactKeys.github, lang)}</span>
+        <span class="v"
+          ><a href={links.github} target="_blank" rel="noopener">github.com/alimuraat</a></span
+        >
+      </li>
+    </ul>
+
+    <nav class="cta" aria-label={t(ui.ctaAriaContact, lang)}>
+      <a href={`mailto:${links.email}`}>{t(ui.cta.email, lang)}</a>
+      <a href={links.securityTxt}>{t(ui.cta.securityTxt, lang)}</a>
+      <a href={links.linkedin} target="_blank" rel="noopener">{t(ui.cta.linkedin, lang)}</a>
+    </nav>
+
+    <p class="note">
+      {t(ui.contactNote, lang)} <a href={links.securityTxt}>security.txt</a>
+    </p>
+  </section>
+</Base>
