@@ -9,7 +9,7 @@ import '../styles/tokens.css';
 import '../styles/fonts.css';
 import '../styles/base.css';
 
-type BackdropVariant = 'mesh' | 'route' | 'scan' | 'drift' | 'orbit' | 'ripple' | 'none';
+type BackdropVariant = 'recon' | 'trace' | 'spread' | 'pipeline' | 'cipher' | 'links' | 'handshake';
 
 interface Props {
   lang: Lang;
@@ -23,7 +23,7 @@ interface Props {
   noindex?: boolean;
 }
 
-const { lang, title, description, ogDescription, backdrop = 'mesh', noindex = false } = Astro.props;
+const { lang, title, description, ogDescription, backdrop = 'recon', noindex = false } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const bare = basePath(Astro.url.pathname);

@@ -1,0 +1,156 @@
+---
+/**
+ * Projects — build pipeline.
+ *
+ * Jobs enter on the left and move stage by stage across the viewport, lighting
+ * each node they land on. A few fail their gate, get marked, and the pipeline
+ * carries on — which is what a security gate in CI actually looks like.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage((k) => {
+    const { c, W, H, anim, rand, RED } = k;
+
+    const STAGES = 5;
+    type Node = { x: number; y: number; lit: number; fail: number; next: number[] };
+    const cols: Node[][] = [];
+
+    for (let s = 0; s < STAGES; s++) {
+      const count = 2 + ((Math.random() * 3) | 0);
+      const x = (W * (s + 0.5)) / STAGES;
+      const col: Node[] = [];
+      for (let i = 0; i < count; i++) {
+        col.push({
+          x: x + rand(-18, 18),
+          y: (H * (i + 0.5)) / count + rand(-H * 0.06, H * 0.06),
+          lit: -1e9,
+          fail: -1e9,
+          next: [],
+        });
+      }
+      cols.push(col);
+    }
+    for (let s = 0; s < STAGES - 1; s++) {
+      for (const n of cols[s]) {
+        const pool = cols[s + 1].map((_, i) => i).sort(() => Math.random() - 0.5);
+        n.next = pool.slice(0, 1 + ((Math.random() * 2) | 0));
+      }
+    }
+
+    type Job = { s: number; i: number; j: number; u: number; sp: number; dead: number };
+    const jobs: Job[] = [];
+    const spawn = () => {
+      const i = (Math.random() * cols[0].length) | 0;
+      const from = cols[0][i];
+      if (!from.next.length) return;
+      jobs.push({
+        s: 0,
+        i,
+        j: from.next[(Math.random() * from.next.length) | 0],
+        u: 0,
+        sp: rand(0.004, 0.009),
+        dead: 0,
+      });
+    };
+    for (let i = 0; i < 3; i++) spawn();
+
+    let f = 0;
+
+    return () => {
+      f++;
+
+      c.lineWidth = 1;
+      for (let s = 0; s < STAGES - 1; s++) {
+        for (const n of cols[s]) {
+          for (const j of n.next) {
+            const m = cols[s + 1][j];
+            c.strokeStyle = `rgba(${RED},.11)`;
+            c.beginPath();
+            c.moveTo(n.x, n.y);
+            c.lineTo(m.x, m.y);
+            c.stroke();
+          }
+        }
+      }
+
+      for (const col of cols) {
+        for (const n of col) {
+          const lit = Math.max(0, 1 - (f - n.lit) / 90);
+          const bad = Math.max(0, 1 - (f - n.fail) / 110);
+          c.strokeStyle = `rgba(${RED},${(0.22 + lit * 0.55).toFixed(3)})`;
+          c.strokeRect(n.x - 4.5, n.y - 4.5, 9, 9);
+          if (lit > 0) {
+            const g = c.createRadialGradient(n.x, n.y, 0, n.x, n.y, 20);
+            g.addColorStop(0, `rgba(255,90,105,${(lit * 0.3).toFixed(3)})`);
+            g.addColorStop(1, `rgba(${RED},0)`);
+            c.fillStyle = g;
+            c.beginPath();
+            c.arc(n.x, n.y, 20, 0, 6.2832);
+            c.fill();
+          }
+          if (bad > 0) {
+            c.strokeStyle = `rgba(240,160,32,${(bad * 0.7).toFixed(3)})`;
+            c.beginPath();
+            c.moveTo(n.x - 7, n.y - 7);
+            c.lineTo(n.x + 7, n.y + 7);
+            c.moveTo(n.x + 7, n.y - 7);
+            c.lineTo(n.x - 7, n.y + 7);
+            c.stroke();
+          }
+        }
+      }
+
+      for (let q = jobs.length - 1; q >= 0; q--) {
+        const job = jobs[q];
+        const a = cols[job.s][job.i];
+        const b = cols[job.s + 1][job.j];
+        if (!a || !b) {
+          jobs.splice(q, 1);
+          continue;
+        }
+        if (anim) job.u += job.sp;
+
+        const x = a.x + (b.x - a.x) * job.u;
+        const y = a.y + (b.y - a.y) * job.u;
+
+        c.strokeStyle = `rgba(${RED},.2)`;
+        c.beginPath();
+        c.moveTo(a.x, a.y);
+        c.lineTo(x, y);
+        c.stroke();
+
+        const g = c.createRadialGradient(x, y, 0, x, y, 13);
+        g.addColorStop(0, 'rgba(255,90,105,.6)');
+        g.addColorStop(1, `rgba(${RED},0)`);
+        c.fillStyle = g;
+        c.beginPath();
+        c.arc(x, y, 13, 0, 6.2832);
+        c.fill();
+        c.fillStyle = 'rgba(255,205,210,.9)';
+        c.fillRect(x - 1.7, y - 1.7, 3.4, 3.4);
+
+        if (job.u >= 1) {
+          b.lit = f;
+          const failed = Math.random() < 0.12;
+          if (failed) b.fail = f;
+          jobs.splice(q, 1);
+          if (!failed && job.s + 1 < STAGES - 1 && b.next.length) {
+            jobs.push({
+              s: job.s + 1,
+              i: job.j,
+              j: b.next[(Math.random() * b.next.length) | 0],
+              u: 0,
+              sp: job.sp,
+              dead: 0,
+            });
+          }
+        }
+      }
+
+      if (anim && jobs.length < 5 && Math.random() < 0.02) spawn();
+    };
+  });
+</script>

@@ -1,0 +1,137 @@
+---
+/**
+ * Certifications — permutation network.
+ *
+ * Blocks travel left to right along lanes, and at each round column the wiring
+ * swaps pairs of lanes, so a block visibly ends up somewhere it did not start.
+ * Every so often the permutation is redrawn. It is the diagram every cipher
+ * and every standard is explained with.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage((k) => {
+    const { c, W, H, anim, rand, RED } = k;
+
+    const LANES = Math.max(6, Math.min(15, Math.round(H / 74)));
+    const ROUNDS = Math.max(4, Math.min(7, Math.round(W / 260)));
+    const laneY = (i: number) => (H * (i + 0.5)) / LANES;
+    const roundX = (r: number) => (W * (r + 1)) / (ROUNDS + 1);
+
+    /* perm[r][lane] = lane it leaves that round on. */
+    let perm: number[][] = [];
+    let shuffled = 0;
+
+    const shuffle = () => {
+      perm = [];
+      for (let r = 0; r < ROUNDS; r++) {
+        const map = Array.from({ length: LANES }, (_, i) => i);
+        const pool = map.slice().sort(() => Math.random() - 0.5);
+        for (let i = 0; i + 1 < pool.length; i += 2) {
+          if (Math.random() < 0.55) {
+            const a = pool[i];
+            const b = pool[i + 1];
+            map[a] = b;
+            map[b] = a;
+          }
+        }
+        perm.push(map);
+      }
+    };
+    shuffle();
+
+    /* A block sits on a lane, crosses at each round, wraps at the right edge. */
+    type Block = { x: number; lane: number; from: number; sp: number; r: number };
+    const blocks: Block[] = Array.from({ length: Math.max(3, Math.round(LANES / 3)) }, () => {
+      const lane = (Math.random() * LANES) | 0;
+      return { x: Math.random() * W, lane, from: lane, sp: rand(0.5, 1.15), r: 0 };
+    });
+
+    let f = 0;
+
+    return () => {
+      f++;
+      if (anim && f - shuffled > 900) {
+        shuffle();
+        shuffled = f;
+      }
+      const settle = Math.max(0, 1 - (f - shuffled) / 40);
+
+      c.lineWidth = 1;
+
+      /* Lanes. */
+      for (let i = 0; i < LANES; i++) {
+        c.strokeStyle = `rgba(${RED},.105)`;
+        c.beginPath();
+        c.moveTo(0, laneY(i));
+        c.lineTo(W, laneY(i));
+        c.stroke();
+      }
+
+      /* Round columns and their crossings. */
+      for (let r = 0; r < ROUNDS; r++) {
+        const x = roundX(r);
+        c.strokeStyle = `rgba(${RED},${(0.12 + settle * 0.25).toFixed(3)})`;
+        c.beginPath();
+        c.moveTo(x, 0);
+        c.lineTo(x, H);
+        c.stroke();
+
+        for (let i = 0; i < LANES; i++) {
+          const j = perm[r][i];
+          if (j === i || j < i) continue;
+          const y0 = laneY(i);
+          const y1 = laneY(j);
+          c.strokeStyle = `rgba(${RED},${(0.17 + settle * 0.3).toFixed(3)})`;
+          c.beginPath();
+          c.moveTo(x - 26, y0);
+          c.bezierCurveTo(x - 6, y0, x + 6, y1, x + 26, y1);
+          c.moveTo(x - 26, y1);
+          c.bezierCurveTo(x - 6, y1, x + 6, y0, x + 26, y0);
+          c.stroke();
+        }
+      }
+
+      for (const b of blocks) {
+        if (anim) b.x += b.sp;
+        if (b.x > W + 30) {
+          b.x = -30;
+          b.r = 0;
+          b.from = b.lane;
+        }
+
+        /* Crossing: interpolate between the two lanes across the swap span. */
+        let y = laneY(b.lane);
+        let crossing = false;
+        for (let r = 0; r < ROUNDS; r++) {
+          const x = roundX(r);
+          if (b.x > x - 26 && b.x < x + 26) {
+            const j = perm[r][b.lane];
+            if (j !== b.lane) {
+              const u = (b.x - (x - 26)) / 52;
+              const e = u * u * (3 - 2 * u);
+              y = laneY(b.lane) + (laneY(j) - laneY(b.lane)) * e;
+              crossing = true;
+            }
+          } else if (anim && b.x >= x + 26 && b.r === r) {
+            b.lane = perm[r][b.lane];
+            b.r = r + 1;
+          }
+        }
+
+        const g = c.createRadialGradient(b.x, y, 0, b.x, y, 15);
+        g.addColorStop(0, `rgba(255,90,105,${crossing ? 0.6 : 0.42})`);
+        g.addColorStop(1, `rgba(${RED},0)`);
+        c.fillStyle = g;
+        c.beginPath();
+        c.arc(b.x, y, 15, 0, 6.2832);
+        c.fill();
+
+        c.fillStyle = `rgba(255,205,210,${crossing ? 0.95 : 0.8})`;
+        c.fillRect(b.x - 2, y - 2, 4, 4);
+      }
+    };
+  });
+</script>

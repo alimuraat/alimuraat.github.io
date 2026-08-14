@@ -1,8 +1,8 @@
 # alimurattava.com
 
 Personal security portfolio. Astro v5, static output, no client framework.
-Total shipped JS is ~1.7 KB gzip (two scripts: the background mesh and the hero
-terminal).
+A page ships ~2 KB gzip of JavaScript: the backdrop harness plus that page's
+one scene, and on the home page the hero terminal as well.
 
 ```bash
 npm install
@@ -57,7 +57,7 @@ the nav links to the same page in the other language — `basePath()` strips the
 | `views/Certifications.astro` | `/certifications/` · `/tr/certifications/` | `site.json` → `pages.certifications` · `certifications.json` → `certifications`, `education`, `languages` |
 | `views/Travel.astro` | `/travel/` · `/tr/travel/` | `site.json` → `pages.travel` · `places.json` → `places` · `world-path.json` (generated coastline) |
 | `views/Contact.astro` | `/contact/` · `/tr/contact/` | `site.json` → `pages.contact`, `links` |
-| `pages/404.astro` | any unknown path | `ui.json` → `notFound`. Bilingual and `noindex`, since Cloudflare serves it under `/tr/` too |
+| `pages/404.astro` | any unknown path | `ui.json` → `notFound`. Bilingual and `noindex`, since the host serves it under `/tr/` too |
 
 `site.json` also drives what every page shares: `nav` (order, hrefs, labels),
 `initials` (nav brand) and `links`. All the chrome text — skip link, status
@@ -113,25 +113,30 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 
 ## Backdrops
 
-`Backdrop.astro` paints the four fixed layers — top glow, canvas, masked 46px
-grid, CRT scanline — and each page picks its own canvas animation through the
-`backdrop` prop on `Base.astro`:
+`Backdrop.astro` paints the fixed layers — top and bottom glow, canvas, 46px
+grid, CRT scanline — and picks one scene per page. Each scene is its own
+component under `src/components/backdrops/`, so a page bundles only the one it
+uses (~1 KB gzip each) on top of the shared harness in `src/scripts/stage.ts`
+(~0.9 KB).
 
-| Page | Variant | What it does |
+| Page | Scene | What it is |
 | --- | --- | --- |
-| `/` | `mesh` | node network with red packets travelling the edges |
-| `/experience` | `route` | routed polylines with a signal running along each one — the same idea as the roadmap in front of it |
-| `/research` | `scan` | sweep line descending, flaring the points it crosses |
-| `/projects` | `drift` | outlined squares rising slowly |
-| `/certifications` | `orbit` | concentric arcs turning around the top glow |
-| `/contact` | `ripple` | signal rings expanding from one point |
-| `/travel` | `none` | no canvas — the map's radar pings are the motion |
+| `/` | `recon` | The pointer is a scanner: a spoke rotates around it, hosts it crosses get bracketed and labelled with a service, hosts lean away from it, a click pings. No pointer (mobile, or nobody has moved yet) and the scanner walks the viewport itself |
+| `/experience` | `trace` | Traceroute resolving hop by hop with latencies and the odd `* * *`, then fading and starting a new path |
+| `/research` | `spread` | A compromise propagating along the links between hosts until a patch wave sweeps the viewport and clears it |
+| `/projects` | `pipeline` | Build jobs moving stage to stage; some fail their gate and get marked |
+| `/certifications` | `cipher` | A permutation network — blocks travel lanes and swap at each round column, and the wiring reshuffles periodically |
+| `/travel` | `links` | Connections drawing themselves between endpoints, landing with a ring, then fading |
+| `/contact` | `handshake` | Pulses trading across a channel, sealing a block each pass, with a session ring every round |
 
-All of them share the same shell: `devicePixelRatio` capped at 2, resize
-debounced 180 ms, rAF stopped while the tab is hidden, and one static frame with
-no loop at all under `prefers-reduced-motion: reduce`. Strokes stay thin and
-under ~0.25 alpha — the motion should be obvious at a glance and still invisible
-while you are reading a paragraph over it.
+The harness owns device pixel ratio (capped at 2), a 180 ms debounced resize,
+pausing the rAF loop while the tab is hidden, pointer tracking, and reduced
+motion — where every scene draws one composed frame and never moves. Structural
+strokes stay under ~0.25 alpha; only small heads and labels go brighter.
+
+To add a scene: drop a component next to the others that calls `stage()`,
+register it in `Backdrop.astro`, and add its name to the `BackdropVariant`
+union in `Base.astro`.
 
 ## The experience roadmap
 

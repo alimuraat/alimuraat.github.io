@@ -68,9 +68,11 @@ img { max-width: 100%; }
   background:
     linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 46px,
     linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 46px 100%;
-  opacity: .5;
-  mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 15%, transparent 78%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 65% at 50% 0%, #000 15%, transparent 78%);
+  opacity: .55;
+  /* Densest at the top, but never fully transparent — the grid has to reach the
+     bottom of the viewport at every scroll position, not stop halfway. */
+  mask-image: radial-gradient(ellipse 120% 115% at 50% 0%, #000 28%, rgba(0, 0, 0, .5) 100%);
+  -webkit-mask-image: radial-gradient(ellipse 120% 115% at 50% 0%, #000 28%, rgba(0, 0, 0, .5) 100%);
 }
 .bg-glow {
   position: fixed;
@@ -89,6 +91,26 @@ img { max-width: 100%; }
     transparent 68%
   );
   filter: blur(26px);
+}
+/* Counterweight to .bg-glow so the light does not all sit at the top of the
+   screen — every viewport gets some at the bottom edge too. */
+.bg-glow-low {
+  position: fixed;
+  left: 50%;
+  bottom: -430px;
+  width: 1500px;
+  height: 780px;
+  max-width: 120vw;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 51, 68, .14) 0%,
+    rgba(255, 51, 68, .06) 42%,
+    transparent 70%
+  );
+  filter: blur(30px);
 }
 .bg-scan {
   position: fixed;

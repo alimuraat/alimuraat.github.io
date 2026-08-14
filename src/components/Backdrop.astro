@@ -1,401 +1,51 @@
 ---
 /**
- * The four fixed background layers, in paint order:
- *   1. .bg-glow  — cold red light bleeding in from the top of the page
- *   2. #net      — the canvas, whose animation changes per page
- *   3. .bg-grid  — 46px grid, masked so it fades away below the fold line
- *   4. .bg-scan  — 3px CRT scanline
+ * The fixed background layers, in paint order:
+ *   1. .bg-glow / .bg-glow-low  — red light bleeding in at the top and bottom
+ *   2. #net                     — the canvas, one scene per page
+ *   3. .bg-grid                 — 46px grid across the whole viewport
+ *   4. .bg-scan                 — 3px CRT scanline
  *
- * Every layer is pointer-events:none and sits below the z-index:2 content.
- * Strokes stay thin and under ~0.25 alpha: the motion should be obvious at a
- * glance and still invisible while you are reading a paragraph over it.
+ * Every layer is pointer-events:none and sits below the z-index:2 content, and
+ * because the canvas is position:fixed the scene covers the viewport at any
+ * scroll position — the motion never runs out halfway down a long page.
  *
- * Variants:
- *   mesh    — node network with red packets travelling the edges  (/)
- *   route   — routed polylines with a signal running each line    (/experience)
- *   scan    — sweep line that flares the points it crosses        (/research)
- *   drift   — outlined squares rising slowly                      (/projects)
- *   orbit   — concentric arcs turning around the top glow         (/certifications)
- *   ripple  — signal rings expanding from a single point          (/contact)
- *   none    — no canvas at all; the page has its own motion       (/travel)
+ * Each scene is its own component so only the one a page uses is bundled into
+ * that page; they share the harness in src/scripts/stage.ts.
+ *
+ *   recon      — pointer-driven scan sweep, probing hosts      (/)
+ *   trace      — traceroute resolving hop by hop               (/experience)
+ *   spread     — compromise propagating, then a patch wave     (/research)
+ *   pipeline   — build jobs moving through stage gates         (/projects)
+ *   cipher     — permutation network shuffling lanes           (/certifications)
+ *   links      — connections opening between endpoints         (/travel)
+ *   handshake  — key exchange across a channel                 (/contact)
  */
+import Recon from './backdrops/Recon.astro';
+import Trace from './backdrops/Trace.astro';
+import Spread from './backdrops/Spread.astro';
+import Pipeline from './backdrops/Pipeline.astro';
+import Cipher from './backdrops/Cipher.astro';
+import Links from './backdrops/Links.astro';
+import Handshake from './backdrops/Handshake.astro';
+
 interface Props {
-  variant?: 'mesh' | 'route' | 'scan' | 'drift' | 'orbit' | 'ripple' | 'none';
+  variant?: 'recon' | 'trace' | 'spread' | 'pipeline' | 'cipher' | 'links' | 'handshake';
 }
 
-const { variant = 'mesh' } = Astro.props;
+const { variant = 'recon' } = Astro.props;
 ---
 
 <div class="bg-glow" aria-hidden="true"></div>
-{variant !== 'none' && <canvas id="net" aria-hidden="true" data-variant={variant} />}
+<div class="bg-glow-low" aria-hidden="true"></div>
+<canvas id="net" aria-hidden="true" data-variant={variant}></canvas>
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-scan" aria-hidden="true"></div>
 
-<script>
-  const canvas = document.getElementById('net') as HTMLCanvasElement | null;
-  const ctx = canvas?.getContext('2d', { alpha: true });
-
-  if (canvas && ctx) {
-    const c = ctx;
-    const RED = '255,51,68';
-    const anim = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const rand = (a: number, b: number) => a + Math.random() * (b - a);
-
-    let W = 0;
-    let H = 0;
-    let raf: number | null = null;
-    let frame: () => void = () => {};
-
-    /* ---------------------------------------------------------------- mesh */
-    function mesh() {
-      const LINK = 170;
-      const n = innerWidth < 760 ? 24 : innerWidth < 1300 ? 42 : 58;
-      const nodes = Array.from({ length: n }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: rand(-0.08, 0.08),
-        vy: rand(-0.08, 0.08),
-      }));
-      const packets: { a: number; b: number; t: number; sp: number }[] = [];
-
-      const spawn = () => {
-        if (packets.length >= 5 || nodes.length < 2) return;
-        const a = (Math.random() * nodes.length) | 0;
-        let b = -1;
-        let best = Infinity;
-        for (let i = 0; i < nodes.length; i++) {
-          if (i === a) continue;
-          const d = Math.hypot(nodes[i].x - nodes[a].x, nodes[i].y - nodes[a].y);
-          if (d < LINK && d < best) {
-            best = d;
-            b = i;
-          }
-        }
-        if (b >= 0) packets.push({ a, b, t: 0, sp: rand(0.008, 0.016) });
-      };
-
-      return () => {
-        for (let i = 0; i < nodes.length; i++) {
-          const p = nodes[i];
-          if (anim) {
-            p.x += p.vx;
-            p.y += p.vy;
-            if (p.x < 0 || p.x > W) p.vx *= -1;
-            if (p.y < 0 || p.y > H) p.vy *= -1;
-          }
-          for (let j = i + 1; j < nodes.length; j++) {
-            const q = nodes[j];
-            const d = Math.hypot(q.x - p.x, q.y - p.y);
-            if (d >= LINK) continue;
-            c.strokeStyle = `rgba(${RED},${((1 - d / LINK) * 0.2).toFixed(3)})`;
-            c.lineWidth = 1;
-            c.beginPath();
-            c.moveTo(p.x, p.y);
-            c.lineTo(q.x, q.y);
-            c.stroke();
-          }
-          c.fillStyle = `rgba(${RED},.45)`;
-          c.beginPath();
-          c.arc(p.x, p.y, 1.2, 0, 6.2832);
-          c.fill();
-        }
-
-        for (let i = packets.length - 1; i >= 0; i--) {
-          const p = packets[i];
-          const A = nodes[p.a];
-          const B = nodes[p.b];
-          p.t += anim ? p.sp : 0;
-          if (p.t >= 1) {
-            packets.splice(i, 1);
-            continue;
-          }
-          const x = A.x + (B.x - A.x) * p.t;
-          const y = A.y + (B.y - A.y) * p.t;
-          const g = c.createRadialGradient(x, y, 0, x, y, 13);
-          g.addColorStop(0, `rgba(255,80,95,.75)`);
-          g.addColorStop(1, `rgba(${RED},0)`);
-          c.fillStyle = g;
-          c.beginPath();
-          c.arc(x, y, 13, 0, 6.2832);
-          c.fill();
-          c.fillStyle = 'rgba(255,190,195,.95)';
-          c.beginPath();
-          c.arc(x, y, 1.6, 0, 6.2832);
-          c.fill();
-        }
-
-        if (anim && Math.random() < 0.03) spawn();
-      };
-    }
-
-    /* --------------------------------------------------------------- route */
-    /* Orthogonal routes across the viewport with a signal running along each
-       one — the roadmap page's background reads as the same idea as its
-       content. */
-    function route() {
-      const lanes = Array.from({ length: innerWidth < 760 ? 3 : 5 }, () => {
-        const pts = [{ x: -60, y: rand(H * 0.08, H * 0.92) }];
-        while (pts[pts.length - 1].x < W + 60) {
-          const last = pts[pts.length - 1];
-          const x = last.x + rand(W * 0.12, W * 0.3);
-          pts.push({ x, y: last.y });
-          const y = Math.min(Math.max(last.y + rand(-H * 0.24, H * 0.24), H * 0.05), H * 0.95);
-          pts.push({ x, y });
-        }
-        const seg: number[] = [];
-        let total = 0;
-        for (let k = 1; k < pts.length; k++) {
-          const d = Math.hypot(pts[k].x - pts[k - 1].x, pts[k].y - pts[k - 1].y);
-          seg.push(d);
-          total += d;
-        }
-        return { pts, seg, total, at: Math.random() * total, sp: rand(0.6, 1.4), o: rand(0.1, 0.16) };
-      });
-
-      const point = (lane: (typeof lanes)[number]) => {
-        let d = lane.at;
-        for (let k = 0; k < lane.seg.length; k++) {
-          if (d <= lane.seg[k]) {
-            const a = lane.pts[k];
-            const b = lane.pts[k + 1];
-            const u = lane.seg[k] === 0 ? 0 : d / lane.seg[k];
-            return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u };
-          }
-          d -= lane.seg[k];
-        }
-        return lane.pts[lane.pts.length - 1];
-      };
-
-      return () => {
-        for (const lane of lanes) {
-          c.strokeStyle = `rgba(${RED},${lane.o.toFixed(3)})`;
-          c.lineWidth = 1;
-          c.beginPath();
-          c.moveTo(lane.pts[0].x, lane.pts[0].y);
-          for (let k = 1; k < lane.pts.length; k++) c.lineTo(lane.pts[k].x, lane.pts[k].y);
-          c.stroke();
-
-          c.fillStyle = `rgba(${RED},${Math.min(0.4, lane.o * 2.2).toFixed(3)})`;
-          for (const p of lane.pts) c.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
-
-          if (anim) {
-            lane.at += lane.sp;
-            if (lane.at > lane.total) lane.at = 0;
-          }
-          const p = point(lane);
-          const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, 16);
-          g.addColorStop(0, 'rgba(255,90,105,.6)');
-          g.addColorStop(1, `rgba(${RED},0)`);
-          c.fillStyle = g;
-          c.beginPath();
-          c.arc(p.x, p.y, 16, 0, 6.2832);
-          c.fill();
-          c.fillStyle = 'rgba(255,200,205,.9)';
-          c.fillRect(p.x - 1.6, p.y - 1.6, 3.2, 3.2);
-        }
-      };
-    }
-
-    /* ---------------------------------------------------------------- scan */
-    function scan() {
-      const dots = Array.from({ length: 46 }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        hit: -1e9,
-      }));
-      let sy = H * 0.35;
-      let f = 0;
-
-      return () => {
-        f++;
-        if (anim) {
-          sy += H / 560;
-          if (sy > H) sy = 0;
-        }
-
-        const g = c.createLinearGradient(0, sy - 90, 0, sy);
-        g.addColorStop(0, `rgba(${RED},0)`);
-        g.addColorStop(1, `rgba(${RED},.09)`);
-        c.fillStyle = g;
-        c.fillRect(0, sy - 90, W, 90);
-        c.strokeStyle = `rgba(${RED},.22)`;
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(0, sy + 0.5);
-        c.lineTo(W, sy + 0.5);
-        c.stroke();
-
-        for (const d of dots) {
-          if (anim && Math.abs(d.y - sy) < 2) d.hit = f;
-          const age = (f - d.hit) / 80;
-          const flare = age < 1 ? 1 - age : 0;
-          c.fillStyle = `rgba(${RED},${(0.2 + flare * 0.75).toFixed(3)})`;
-          c.beginPath();
-          c.arc(d.x, d.y, 1.3 + flare * 2.6, 0, 6.2832);
-          c.fill();
-        }
-      };
-    }
-
-    /* --------------------------------------------------------------- drift */
-    function drift() {
-      const boxes = Array.from({ length: 16 }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        s: rand(12, 40),
-        v: rand(0.16, 0.44),
-        o: rand(0.09, 0.19),
-        a: Math.random() * 6.2832,
-        va: rand(-0.0026, 0.0026),
-      }));
-
-      return () => {
-        for (const b of boxes) {
-          if (anim) {
-            b.y -= b.v;
-            b.a += b.va;
-            if (b.y + b.s < 0) {
-              b.y = H + b.s;
-              b.x = Math.random() * W;
-            }
-          }
-          c.save();
-          c.translate(b.x, b.y);
-          c.rotate(b.a);
-          c.strokeStyle = `rgba(${RED},${b.o.toFixed(3)})`;
-          c.lineWidth = 1;
-          c.strokeRect(-b.s / 2, -b.s / 2, b.s, b.s);
-          c.restore();
-        }
-      };
-    }
-
-    /* --------------------------------------------------------------- orbit */
-    function orbit() {
-      const base = Math.max(W, H);
-      const rings = [
-        { r: base * 0.42, sp: 0.0024, a: 0.4, len: 1.2, o: 0.22 },
-        { r: base * 0.62, sp: -0.0016, a: 2.6, len: 0.85, o: 0.17 },
-        { r: base * 0.85, sp: 0.001, a: 4.9, len: 1.6, o: 0.13 },
-      ];
-
-      return () => {
-        const cx = W * 0.5;
-        const cy = -H * 0.12;
-        for (const g of rings) {
-          if (anim) g.a += g.sp;
-          c.lineWidth = 1;
-          c.strokeStyle = `rgba(${RED},.07)`;
-          c.beginPath();
-          c.arc(cx, cy, g.r, 0, 6.2832);
-          c.stroke();
-          c.strokeStyle = `rgba(${RED},${g.o})`;
-          c.beginPath();
-          c.arc(cx, cy, g.r, g.a, g.a + g.len);
-          c.stroke();
-        }
-      };
-    }
-
-    /* -------------------------------------------------------------- ripple */
-    function ripple() {
-      const waves = [0, 0.25, 0.5, 0.75].map((p) => ({ p }));
-
-      return () => {
-        const cx = W * 0.78;
-        const cy = H * 0.4;
-        const reach = Math.max(W, H) * 0.6;
-        for (const w of waves) {
-          if (anim) {
-            w.p += 0.0026;
-            if (w.p > 1) w.p -= 1;
-          }
-          c.strokeStyle = `rgba(${RED},${((1 - w.p) * 0.22).toFixed(3)})`;
-          c.lineWidth = 1;
-          c.beginPath();
-          c.arc(cx, cy, w.p * reach, 0, 6.2832);
-          c.stroke();
-        }
-        c.fillStyle = `rgba(${RED},.5)`;
-        c.beginPath();
-        c.arc(cx, cy, 1.8, 0, 6.2832);
-        c.fill();
-      };
-    }
-
-    const SCENES: Record<string, () => () => void> = {
-      mesh,
-      route,
-      scan,
-      drift,
-      orbit,
-      ripple,
-    };
-
-    function size() {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      W = innerWidth;
-      H = innerHeight;
-      canvas!.width = W * dpr;
-      canvas!.height = H * dpr;
-      canvas!.style.width = W + 'px';
-      canvas!.style.height = H + 'px';
-      c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function build() {
-      const make = SCENES[canvas!.dataset.variant ?? 'mesh'] ?? mesh;
-      frame = make();
-    }
-
-    function paint() {
-      c.clearRect(0, 0, W, H);
-      frame();
-    }
-
-    function loop() {
-      paint();
-      raf = requestAnimationFrame(loop);
-    }
-
-    const stop = () => {
-      if (raf !== null) {
-        cancelAnimationFrame(raf);
-        raf = null;
-      }
-    };
-    const start = () => {
-      if (raf === null && anim) raf = requestAnimationFrame(loop);
-    };
-
-    size();
-    build();
-    if (anim) start();
-    else paint(); /* one static frame, no rAF loop at all */
-
-    let t: ReturnType<typeof setTimeout>;
-    addEventListener('resize', () => {
-      clearTimeout(t);
-      t = setTimeout(() => {
-        size();
-        build();
-        if (!anim) paint();
-      }, 180);
-    });
-
-    /* A page that loads in a background tab can be measured at 0x0. Re-check
-       the size on the way back to visible so the canvas is never left blank. */
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        stop();
-        return;
-      }
-      if (W !== innerWidth || H !== innerHeight) {
-        size();
-        build();
-        if (!anim) paint();
-      }
-      start();
-    });
-  }
-</script>
+{variant === 'recon' && <Recon />}
+{variant === 'trace' && <Trace />}
+{variant === 'spread' && <Spread />}
+{variant === 'pipeline' && <Pipeline />}
+{variant === 'cipher' && <Cipher />}
+{variant === 'links' && <Links />}
+{variant === 'handshake' && <Handshake />}

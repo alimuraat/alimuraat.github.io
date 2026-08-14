@@ -1,0 +1,179 @@
+---
+/**
+ * Home — reconnaissance sweep.
+ *
+ * The pointer is the scanner: a spoke rotates around it, and every host it
+ * crosses inside the sensor radius gets probed — brackets, then a service
+ * label that fades. Hosts lean away from the scanner, a few are flagged, and a
+ * click sends a ping out. With no pointer the scanner walks the viewport on
+ * its own, so a phone sees the same thing.
+ */
+---
+
+<script>
+  import { stage, drawClickRings } from '../../scripts/stage';
+
+  const SERVICES = [
+    '22/tcp',
+    '443/tcp',
+    '80/tcp',
+    '8080/tcp',
+    '3389/tcp',
+    '53/udp',
+    'tls 1.3',
+    'open',
+    'filtered',
+    'no banner',
+  ];
+
+  stage((k) => {
+    const { c, W, H, anim, ptr, rand, RED, mono } = k;
+    const REACH = 250;
+    const LINK = 175;
+    const N = Math.max(24, Math.min(96, Math.round((W * H) / 17000)));
+
+    const hosts = Array.from({ length: N }, () => {
+      const x = Math.random() * W;
+      const y = Math.random() * H;
+      return {
+        hx: x,
+        hy: y,
+        x,
+        y,
+        vx: rand(-0.07, 0.07),
+        vy: rand(-0.07, 0.07),
+        near: 0,
+        probed: -1e9,
+        label: '',
+        flag: Math.random() < 0.12,
+      };
+    });
+
+    let fx = W * 0.5;
+    let fy = H * 0.45;
+    let t = 0;
+    let spoke = 0;
+    let f = 0;
+
+    return () => {
+      f++;
+      t += 0.0038;
+      if (anim) {
+        ptr.idle++;
+        spoke += 0.026;
+      }
+
+      const auto = !ptr.seen || ptr.idle > 200;
+      const tx = auto ? W * 0.5 + Math.cos(t) * W * 0.3 : ptr.x;
+      const ty = auto ? H * 0.5 + Math.sin(t * 1.4) * H * 0.32 : ptr.y;
+      const ease = anim ? 0.055 : 1;
+      fx += (tx - fx) * ease;
+      fy += (ty - fy) * ease;
+
+      /* Sensor rings and the rotating sweep, drawn as a decaying trail. */
+      c.lineWidth = 1;
+      for (const r of [REACH * 0.45, REACH]) {
+        c.strokeStyle = `rgba(${RED},.085)`;
+        c.beginPath();
+        c.arc(fx, fy, r, 0, 6.2832);
+        c.stroke();
+      }
+      for (let i = 0; i < 22; i++) {
+        const a = spoke - i * 0.06;
+        c.strokeStyle = `rgba(${RED},${((1 - i / 22) * 0.125).toFixed(3)})`;
+        c.beginPath();
+        c.moveTo(fx, fy);
+        c.lineTo(fx + Math.cos(a) * REACH, fy + Math.sin(a) * REACH);
+        c.stroke();
+      }
+
+      for (const h of hosts) {
+        if (anim) {
+          h.hx += h.vx;
+          h.hy += h.vy;
+          if (h.hx < 0 || h.hx > W) h.vx *= -1;
+          if (h.hy < 0 || h.hy > H) h.vy *= -1;
+        }
+        const dx = h.hx - fx;
+        const dy = h.hy - fy;
+        const d = Math.hypot(dx, dy) || 1;
+        h.near = d < REACH ? 1 - d / REACH : 0;
+        const push = h.near * h.near * 30;
+        h.x = h.hx + (dx / d) * push;
+        h.y = h.hy + (dy / d) * push;
+
+        /* Probed when the spoke passes over it. */
+        if (anim && h.near > 0) {
+          let da = Math.atan2(dy, dx) - (spoke % 6.2832);
+          while (da < -3.1416) da += 6.2832;
+          while (da > 3.1416) da -= 6.2832;
+          if (Math.abs(da) < 0.035) {
+            h.probed = f;
+            h.label = SERVICES[(Math.random() * SERVICES.length) | 0];
+          }
+        }
+      }
+
+      /* The subnet itself: quiet links between neighbouring hosts. */
+      for (let i = 0; i < hosts.length; i++) {
+        const p = hosts[i];
+        for (let j = i + 1; j < hosts.length; j++) {
+          const q = hosts[j];
+          const d = Math.hypot(q.x - p.x, q.y - p.y);
+          if (d >= LINK) continue;
+          const lift = Math.max(p.near, q.near);
+          c.strokeStyle = `rgba(${RED},${((1 - d / LINK) * (0.17 + lift * 0.34)).toFixed(3)})`;
+          c.beginPath();
+          c.moveTo(p.x, p.y);
+          c.lineTo(q.x, q.y);
+          c.stroke();
+        }
+      }
+
+      c.font = mono(9);
+      c.textBaseline = 'middle';
+      for (const h of hosts) {
+        const age = (f - h.probed) / 150;
+        const fresh = age < 1 ? 1 - age : 0;
+
+        c.fillStyle = `rgba(${RED},${(0.4 + h.near * 0.5 + fresh * 0.3).toFixed(3)})`;
+        c.beginPath();
+        c.arc(h.x, h.y, 1.35 + fresh * 1.4, 0, 6.2832);
+        c.fill();
+
+        if (h.flag) {
+          const pulse = 0.14 + Math.sin(f * 0.05 + h.hx) * 0.06;
+          c.strokeStyle = `rgba(${RED},${(pulse + fresh * 0.4).toFixed(3)})`;
+          c.beginPath();
+          c.arc(h.x, h.y, 6.5, 0, 6.2832);
+          c.stroke();
+        }
+
+        if (fresh > 0) {
+          const a = fresh * 0.55;
+          /* Corner brackets, then the service. */
+          c.strokeStyle = `rgba(${RED},${a.toFixed(3)})`;
+          for (const s of [-1, 1]) {
+            c.beginPath();
+            c.moveTo(h.x + s * 5, h.y - 5);
+            c.lineTo(h.x + s * 8, h.y - 5);
+            c.moveTo(h.x + s * 8, h.y - 5);
+            c.lineTo(h.x + s * 8, h.y + 5);
+            c.moveTo(h.x + s * 8, h.y + 5);
+            c.lineTo(h.x + s * 5, h.y + 5);
+            c.stroke();
+          }
+          c.fillStyle = `rgba(255,140,150,${(a * 0.8).toFixed(3)})`;
+          c.fillText(h.label, h.x + 13, h.y + 0.5);
+        }
+      }
+
+      c.fillStyle = `rgba(255,190,195,${auto ? 0.3 : 0.75})`;
+      c.beginPath();
+      c.arc(fx, fy, 2, 0, 6.2832);
+      c.fill();
+
+      drawClickRings(k);
+    };
+  });
+</script>

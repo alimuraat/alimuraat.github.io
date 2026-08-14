@@ -1,0 +1,157 @@
+---
+/**
+ * Research — propagation and remediation.
+ *
+ * One host is compromised, the condition spreads along the links to its
+ * neighbours, and once enough of the estate is affected a patch wave sweeps
+ * the viewport and clears it. Then it starts again. It is the shape of every
+ * disclosure on the page in front of it.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage((k) => {
+    const { c, W, H, anim, rand, RED } = k;
+
+    const GAP = 108;
+    const cols = Math.max(4, Math.ceil(W / GAP) + 1);
+    const rows = Math.max(4, Math.ceil(H / GAP) + 1);
+
+    type Node = { x: number; y: number; s: 0 | 1 | 2; at: number; n: number[] };
+    const nodes: Node[] = [];
+    for (let r = 0; r < rows; r++) {
+      for (let i = 0; i < cols; i++) {
+        nodes.push({
+          x: i * GAP + rand(-GAP * 0.28, GAP * 0.28),
+          y: r * GAP + rand(-GAP * 0.28, GAP * 0.28),
+          s: 0,
+          at: 0,
+          n: [],
+        });
+      }
+    }
+
+    /* Neighbour lists and a de-duplicated edge list, both built once. */
+    const edges: [number, number][] = [];
+    const REACH = GAP * 1.42;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        if (Math.hypot(nodes[j].x - nodes[i].x, nodes[j].y - nodes[i].y) > REACH) continue;
+        nodes[i].n.push(j);
+        nodes[j].n.push(i);
+        edges.push([i, j]);
+      }
+    }
+
+    let f = 0;
+    let wave = -1;
+    let hold = 0;
+
+    /* Seed a few hosts and fast-forward the spread before the first frame, so
+       the page never opens on a still lattice waiting for something to happen. */
+    for (let i = 0; i < 3; i++) nodes[(Math.random() * nodes.length) | 0].s = 1;
+    for (let step = 0; step < 12; step++) {
+      for (const n of nodes) {
+        if (n.s !== 1 || !n.n.length || Math.random() > 0.2) continue;
+        const target = nodes[n.n[(Math.random() * n.n.length) | 0]];
+        if (target.s === 0) target.s = 1;
+      }
+    }
+
+    return () => {
+      f++;
+
+      let infected = 0;
+      for (const n of nodes) if (n.s === 1) infected++;
+
+      if (anim) {
+        if (f % 5 === 0) {
+          for (let i = 0; i < nodes.length; i++) {
+            const n = nodes[i];
+            if (n.s !== 1 || n.n.length === 0 || Math.random() > 0.2) continue;
+            const t = nodes[n.n[(Math.random() * n.n.length) | 0]];
+            if (t.s === 0) {
+              t.s = 1;
+              t.at = f;
+            }
+          }
+        }
+
+        /* Enough of the estate is affected — ship the fix. */
+        if (wave < 0 && infected / nodes.length > 0.26) wave = -80;
+        if (wave >= -80 && wave < H + 80) {
+          wave += H / 260;
+          for (const n of nodes) {
+            if (n.s === 1 && Math.abs(n.y - wave) < 26) {
+              n.s = 2;
+              n.at = f;
+            }
+          }
+          if (wave >= H + 80) {
+            wave = -1;
+            hold = f;
+          }
+        }
+
+        /* Patched hosts settle back to normal, then it can start over. */
+        for (const n of nodes) if (n.s === 2 && f - n.at > 420) n.s = 0;
+        if (infected === 0 && wave < 0 && f - hold > 90) {
+          nodes[(Math.random() * nodes.length) | 0].s = 1;
+          hold = f;
+        }
+      }
+
+      c.lineWidth = 1;
+      for (const [a, b] of edges) {
+        const p = nodes[a];
+        const q = nodes[b];
+        const hot = (p.s === 1 ? 1 : 0) + (q.s === 1 ? 1 : 0);
+        c.strokeStyle = hot
+          ? `rgba(${RED},${(0.09 + hot * 0.09).toFixed(3)})`
+          : 'rgba(150,150,162,.085)';
+        c.beginPath();
+        c.moveTo(p.x, p.y);
+        c.lineTo(q.x, q.y);
+        c.stroke();
+      }
+
+      for (const n of nodes) {
+        if (n.s === 1) {
+          const age = Math.min(1, (f - n.at) / 60);
+          c.strokeStyle = `rgba(${RED},${(0.4 * (1 - age)).toFixed(3)})`;
+          c.beginPath();
+          c.arc(n.x, n.y, 3 + age * 13, 0, 6.2832);
+          c.stroke();
+          c.fillStyle = `rgba(${RED},.62)`;
+          c.beginPath();
+          c.arc(n.x, n.y, 2.1, 0, 6.2832);
+          c.fill();
+        } else if (n.s === 2) {
+          const fade = Math.max(0, 1 - (f - n.at) / 420);
+          c.fillStyle = `rgba(150,150,162,${(0.16 + fade * 0.3).toFixed(3)})`;
+          c.fillRect(n.x - 2, n.y - 2, 4, 4);
+        } else {
+          c.fillStyle = 'rgba(150,150,162,.24)';
+          c.beginPath();
+          c.arc(n.x, n.y, 1.35, 0, 6.2832);
+          c.fill();
+        }
+      }
+
+      if (wave >= -80 && wave < H + 80) {
+        const g = c.createLinearGradient(0, wave - 70, 0, wave);
+        g.addColorStop(0, `rgba(${RED},0)`);
+        g.addColorStop(1, `rgba(${RED},.07)`);
+        c.fillStyle = g;
+        c.fillRect(0, wave - 70, W, 70);
+        c.strokeStyle = `rgba(${RED},.24)`;
+        c.beginPath();
+        c.moveTo(0, wave + 0.5);
+        c.lineTo(W, wave + 0.5);
+        c.stroke();
+      }
+    };
+  });
+</script>
