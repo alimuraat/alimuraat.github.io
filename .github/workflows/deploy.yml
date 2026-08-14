@@ -29,17 +29,22 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # Fails the build rather than shipping a page the CSP would break.
-      - name: Assert no inline script or style
+      # Fails the build rather than shipping a page the CSP would break, or a
+      # deploy that quietly lost the dot-directories.
+      - name: Assert build output
         run: |
           if grep -rlE '<script type="module">|<style' dist --include='*.html'; then
             echo "inline script/style found in dist — see README > CSP"
             exit 1
           fi
+          test -f dist/.well-known/security.txt || { echo "security.txt missing"; exit 1; }
 
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+          # Without this the action tars with --exclude=.[^/]*, which silently
+          # drops .well-known/ and .nojekyll from the deploy.
+          include-hidden-files: true
 
   deploy:
     needs: build
