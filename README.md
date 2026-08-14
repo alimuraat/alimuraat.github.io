@@ -119,22 +119,18 @@ component under `src/components/backdrops/`, so a page bundles only the one it
 uses (~1 KB gzip each) on top of the shared harness in `src/scripts/stage.ts`.
 
 The point is that every page gets a different **medium**, not the same motion
-rearranged — a scan field, a log, a hex dump, a tree, a matrix, a wireframe
-globe, a waveform:
+rearranged — a scan field, a log, a timeline board, an isometric wireframe, a
+radar, a globe, a waveform:
 
 | Page | Scene | What it is |
 | --- | --- | --- |
 | `/` | `recon` | An address lattice under a rotating scan. The pointer carries the scanner; whatever the spoke crosses comes back closed, open with a service, or flagged. Nothing follows the cursor and nothing deforms around it. With no pointer the scan walks the viewport itself |
 | `/experience` | `authlog` | Access log entries appearing in fixed slots and fading — grants, role changes, the occasional denial. Nothing scrolls |
-| `/research` | `hexdump` | An `xxd`-style dump where bytes flip in place and a run occasionally goes out of bounds, gets bracketed with its offset, and is written back |
-| `/projects` | `deptree` | A dependency tree resolving top down with advisories and CVEs on some entries. Package names are invented — nothing points at a real project |
-| `/certifications` | `controls` | A control matrix assessed cell by cell: conformant, gap, or nonconformity, then cleared and reassessed |
+| `/research` | `disclosure` | Advisory timelines drifting past a `now` line — reported, triaged, fixed, held under embargo, published. The publish marker flares as it crosses |
+| `/projects` | `build` | An isometric wireframe landscape of modules that rise, hold and come down again, drawn back to front |
+| `/certifications` | `assessment` | A maturity radar over eight axes that eases to a new set of scores every few seconds |
 | `/travel` | `globe` | A wireframe globe in orthographic projection, turning for real, with the visited coordinates as markers that fade round the back |
 | `/contact` | `entropy` | Signal bands converting to ciphertext: dense noise behind an advancing boundary, the readable wave ahead of it |
-
-The hex dump paints its quiet layer once into an offscreen canvas and only
-clears and redraws the bytes that changed, so a wall of text costs almost
-nothing per frame.
 
 The harness owns device pixel ratio (capped at 2), a 180 ms debounced resize,
 pausing the rAF loop while the tab is hidden, pointer tracking, and reduced

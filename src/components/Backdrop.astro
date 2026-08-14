@@ -17,22 +17,22 @@
  *
  *   recon    — address space under a rotating scan     (/)
  *   authlog  — access log entries granting and denying (/experience)
- *   hexdump  — bytes mutating, a run going out of bounds (/research)
- *   deptree  — dependency tree resolving with advisories (/projects)
- *   controls — control matrix being assessed cell by cell (/certifications)
+ *   disclosure — advisory timelines crossing a now line   (/research)
+ *   build      — isometric modules rising and settling    (/projects)
+ *   assessment — a maturity radar re-measuring itself     (/certifications)
  *   globe    — wireframe globe turning                 (/travel)
  *   entropy  — signal bands converting to ciphertext   (/contact)
  */
 import Recon from './backdrops/Recon.astro';
 import Authlog from './backdrops/Authlog.astro';
-import Hexdump from './backdrops/Hexdump.astro';
-import Deptree from './backdrops/Deptree.astro';
-import Controls from './backdrops/Controls.astro';
+import Disclosure from './backdrops/Disclosure.astro';
+import Build from './backdrops/Build.astro';
+import Assessment from './backdrops/Assessment.astro';
 import Globe from './backdrops/Globe.astro';
 import Entropy from './backdrops/Entropy.astro';
 
 interface Props {
-  variant?: 'recon' | 'authlog' | 'hexdump' | 'deptree' | 'controls' | 'globe' | 'entropy';
+  variant?: 'recon' | 'authlog' | 'disclosure' | 'build' | 'assessment' | 'globe' | 'entropy';
 }
 
 const { variant = 'recon' } = Astro.props;
@@ -46,8 +46,8 @@ const { variant = 'recon' } = Astro.props;
 
 {variant === 'recon' && <Recon />}
 {variant === 'authlog' && <Authlog />}
-{variant === 'hexdump' && <Hexdump />}
-{variant === 'deptree' && <Deptree />}
-{variant === 'controls' && <Controls />}
+{variant === 'disclosure' && <Disclosure />}
+{variant === 'build' && <Build />}
+{variant === 'assessment' && <Assessment />}
 {variant === 'globe' && <Globe />}
 {variant === 'entropy' && <Entropy />}

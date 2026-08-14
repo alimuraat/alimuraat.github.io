@@ -1,0 +1,166 @@
+---
+/**
+ * Research — disclosure timelines.
+ *
+ * Each track is one advisory moving right to left as time passes: reported,
+ * triaged, fixed, held under embargo, published. The vertical line is now.
+ * A marker crossing it flares. No text walls — the phases are read from the
+ * way each segment is drawn.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage((k) => {
+    const { c, W, H, anim, rand, RED, mono } = k;
+
+    const ROW = 66;
+    const rows = Math.max(4, Math.floor(H / ROW));
+    const NOW = W * 0.72;
+    const AMBER = '240,160,32';
+
+    type Track = {
+      y: number;
+      x: number;
+      seg: number[];
+      high: boolean;
+      flare: number;
+      label: string;
+    };
+
+    const CWE = ['cwe-79', 'cwe-89', 'cwe-287', 'cwe-502', 'cwe-22', 'cwe-918'];
+
+    const make = (y: number, x: number): Track => ({
+      y,
+      x,
+      seg: [rand(50, 110), rand(70, 150), rand(90, 220), rand(70, 190)],
+      high: Math.random() < 0.42,
+      flare: 0,
+      label: CWE[(Math.random() * CWE.length) | 0],
+    });
+
+    const tracks: Track[] = [];
+    for (let r = 0; r < rows; r++) {
+      const y = ROW * r + ROW * 0.6;
+      let x = -rand(0, W);
+      while (x < W + 200) {
+        tracks.push(make(y, x));
+        x += rand(420, 900);
+      }
+    }
+
+    let f = 0;
+
+    return () => {
+      f++;
+      c.lineWidth = 1;
+      c.font = mono(9);
+      c.textBaseline = 'middle';
+
+      /* Lanes. */
+      for (let r = 0; r < rows; r++) {
+        const y = ROW * r + ROW * 0.6;
+        c.strokeStyle = `rgba(150,150,162,.05)`;
+        c.beginPath();
+        c.moveTo(0, y + 0.5);
+        c.lineTo(W, y + 0.5);
+        c.stroke();
+      }
+
+      for (const t of tracks) {
+        if (anim) t.x -= 0.32;
+        const total = t.seg[0] + t.seg[1] + t.seg[2] + t.seg[3];
+        if (t.x + total < -60) {
+          const fresh = make(t.y, W + rand(60, 500));
+          t.x = fresh.x;
+          t.seg = fresh.seg;
+          t.high = fresh.high;
+          t.label = fresh.label;
+          t.flare = 0;
+        }
+
+        const tone = t.high ? RED : AMBER;
+        let x = t.x;
+        const y = t.y;
+
+        /* Reported: a diamond, then a plain line. */
+        c.strokeStyle = `rgba(${tone},.26)`;
+        c.beginPath();
+        c.moveTo(x, y - 4);
+        c.lineTo(x + 4, y);
+        c.lineTo(x, y + 4);
+        c.lineTo(x - 4, y);
+        c.closePath();
+        c.stroke();
+
+        c.strokeStyle = `rgba(${tone},.16)`;
+        c.beginPath();
+        c.moveTo(x + 5, y);
+        c.lineTo(x + t.seg[0], y);
+        c.stroke();
+        x += t.seg[0];
+
+        /* Triage: dashes. */
+        c.strokeStyle = `rgba(${tone},.19)`;
+        for (let d = 0; d < t.seg[1]; d += 9) {
+          c.beginPath();
+          c.moveTo(x + d, y);
+          c.lineTo(x + Math.min(d + 4, t.seg[1]), y);
+          c.stroke();
+        }
+        x += t.seg[1];
+
+        /* Fix: a solid bar with weight. */
+        c.fillStyle = `rgba(${tone},.1)`;
+        c.fillRect(x, y - 3, t.seg[2], 6);
+        c.strokeStyle = `rgba(${tone},.26)`;
+        c.strokeRect(x + 0.5, y - 3.5, t.seg[2], 7);
+        x += t.seg[2];
+
+        /* Embargo: an open window. */
+        c.strokeStyle = `rgba(150,150,162,.2)`;
+        c.beginPath();
+        c.moveTo(x, y - 7);
+        c.lineTo(x, y + 7);
+        c.moveTo(x, y);
+        c.lineTo(x + t.seg[3], y);
+        c.moveTo(x + t.seg[3], y - 7);
+        c.lineTo(x + t.seg[3], y + 7);
+        c.stroke();
+        x += t.seg[3];
+
+        /* Published. */
+        const crossed = x <= NOW;
+        if (anim && crossed && t.flare === 0) t.flare = f;
+        const glow = t.flare ? Math.max(0, 1 - (f - t.flare) / 90) : 0;
+
+        c.fillStyle = `rgba(${tone},${(0.26 + glow * 0.45).toFixed(3)})`;
+        c.fillRect(x - 3, y - 6, 6, 12);
+        if (glow > 0) {
+          const g = c.createRadialGradient(x, y, 0, x, y, 26);
+          g.addColorStop(0, `rgba(${tone},${(glow * 0.18).toFixed(3)})`);
+          g.addColorStop(1, `rgba(${tone},0)`);
+          c.fillStyle = g;
+          c.beginPath();
+          c.arc(x, y, 20, 0, 6.2832);
+          c.fill();
+        }
+
+        if (t.high) {
+          c.fillStyle = `rgba(${tone},.22)`;
+          c.fillText(t.label, t.x + 8, y - 13);
+        }
+      }
+
+      /* Now. */
+      c.strokeStyle = `rgba(${RED},.24)`;
+      c.beginPath();
+      c.moveTo(NOW + 0.5, 0);
+      c.lineTo(NOW + 0.5, H);
+      c.stroke();
+      c.fillStyle = `rgba(${RED},.4)`;
+      c.fillText('now', NOW + 6, 14);
+    };
+  });
+</script>
