@@ -17,22 +17,22 @@
  *
  *   recon    — address space under a rotating scan     (/)
  *   authlog  — access log entries granting and denying (/experience)
- *   disclosure — advisory timelines crossing a now line   (/research)
+ *   fracture   — a crack propagating and branching        (/research)
  *   build      — isometric modules rising and settling    (/projects)
- *   assessment — a maturity radar re-measuring itself     (/certifications)
+ *   mechanism  — notched rings converging on a mark       (/certifications)
  *   globe    — wireframe globe turning                 (/travel)
  *   entropy  — signal bands converting to ciphertext   (/contact)
  */
 import Recon from './backdrops/Recon.astro';
 import Authlog from './backdrops/Authlog.astro';
-import Disclosure from './backdrops/Disclosure.astro';
+import Fracture from './backdrops/Fracture.astro';
 import Build from './backdrops/Build.astro';
-import Assessment from './backdrops/Assessment.astro';
+import Mechanism from './backdrops/Mechanism.astro';
 import Globe from './backdrops/Globe.astro';
 import Entropy from './backdrops/Entropy.astro';
 
 interface Props {
-  variant?: 'recon' | 'authlog' | 'disclosure' | 'build' | 'assessment' | 'globe' | 'entropy';
+  variant?: 'recon' | 'authlog' | 'fracture' | 'build' | 'mechanism' | 'globe' | 'entropy';
 }
 
 const { variant = 'recon' } = Astro.props;
@@ -46,8 +46,8 @@ const { variant = 'recon' } = Astro.props;
 
 {variant === 'recon' && <Recon />}
 {variant === 'authlog' && <Authlog />}
-{variant === 'disclosure' && <Disclosure />}
+{variant === 'fracture' && <Fracture />}
 {variant === 'build' && <Build />}
-{variant === 'assessment' && <Assessment />}
+{variant === 'mechanism' && <Mechanism />}
 {variant === 'globe' && <Globe />}
 {variant === 'entropy' && <Entropy />}

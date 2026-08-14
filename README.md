@@ -119,16 +119,16 @@ component under `src/components/backdrops/`, so a page bundles only the one it
 uses (~1 KB gzip each) on top of the shared harness in `src/scripts/stage.ts`.
 
 The point is that every page gets a different **medium**, not the same motion
-rearranged — a scan field, a log, a timeline board, an isometric wireframe, a
-radar, a globe, a waveform:
+rearranged — a scan field, a log, fracture lines, an isometric wireframe, a
+mechanism, a globe, a waveform:
 
 | Page | Scene | What it is |
 | --- | --- | --- |
 | `/` | `recon` | An address lattice under a rotating scan. The pointer carries the scanner; whatever the spoke crosses comes back closed, open with a service, or flagged. Nothing follows the cursor and nothing deforms around it. With no pointer the scan walks the viewport itself |
 | `/experience` | `authlog` | Access log entries appearing in fixed slots and fading — grants, role changes, the occasional denial. Nothing scrolls |
-| `/research` | `disclosure` | Advisory timelines drifting past a `now` line — reported, triaged, fixed, held under embargo, published. The publish marker flares as it crosses |
+| `/research` | `fracture` | A stress point opens and a hairline crack walks out of it, branching until it runs out of viewport or energy, then anneals away and the next one starts |
 | `/projects` | `build` | An isometric wireframe landscape of modules that rise, hold and come down again, drawn back to front |
-| `/certifications` | `assessment` | A maturity radar over eight axes that eases to a new set of scores every few seconds |
+| `/certifications` | `mechanism` | Notched rings turning at their own rates, then converging their key notches on one mark, holding, and releasing |
 | `/travel` | `globe` | A wireframe globe in orthographic projection, turning for real, with the visited coordinates as markers that fade round the back |
 | `/contact` | `entropy` | Signal bands converting to ciphertext: dense noise behind an advancing boundary, the readable wave ahead of it |
 
