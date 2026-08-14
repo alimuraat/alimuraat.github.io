@@ -1,53 +1,46 @@
 ---
 /**
- * Home — reconnaissance sweep.
+ * Home — address space under a scan.
  *
- * The pointer is the scanner: a spoke rotates around it, and every host it
- * crosses inside the sensor radius gets probed — brackets, then a service
- * label that fades. Hosts lean away from the scanner, a few are flagged, and a
- * click sends a ping out. With no pointer the scanner walks the viewport on
- * its own, so a phone sees the same thing.
+ * Hosts sit still on a lattice, the way addresses do. The pointer carries the
+ * scanner: a spoke rotates around it, and whatever it crosses inside the
+ * sensor radius gets a result — most closed, some open with a service, the
+ * occasional one flagged. Nothing follows the cursor and nothing deforms
+ * around it; the cursor only decides where the scan is looking.
  */
 ---
 
 <script>
   import { stage, drawClickRings } from '../../scripts/stage';
 
-  const SERVICES = [
-    '22/tcp',
-    '443/tcp',
-    '80/tcp',
-    '8080/tcp',
-    '3389/tcp',
-    '53/udp',
-    'tls 1.3',
-    'open',
-    'filtered',
-    'no banner',
-  ];
+  const OPEN = ['22/tcp', '443/tcp', '80/tcp', '8080/tcp', '3389/tcp', '5432/tcp', '53/udp'];
+  const FLAG = ['cvss 8.8', 'cvss 9.1', 'outdated tls', 'default creds', 'cve-2026-*'];
 
   stage((k) => {
     const { c, W, H, anim, ptr, rand, RED, mono } = k;
     const REACH = 250;
-    const LINK = 175;
-    const N = Math.max(24, Math.min(96, Math.round((W * H) / 17000)));
+    const GAP = 72;
 
-    const hosts = Array.from({ length: N }, () => {
-      const x = Math.random() * W;
-      const y = Math.random() * H;
-      return {
-        hx: x,
-        hy: y,
-        x,
-        y,
-        vx: rand(-0.07, 0.07),
-        vy: rand(-0.07, 0.07),
-        near: 0,
-        probed: -1e9,
-        label: '',
-        flag: Math.random() < 0.12,
-      };
-    });
+    const cols = Math.ceil(W / GAP) + 1;
+    const rows = Math.ceil(H / GAP) + 1;
+    const hosts: {
+      x: number;
+      y: number;
+      at: number;
+      kind: 0 | 1 | 2;
+      label: string;
+    }[] = [];
+    for (let r = 0; r < rows; r++) {
+      for (let i = 0; i < cols; i++) {
+        hosts.push({
+          x: i * GAP + rand(-9, 9),
+          y: r * GAP + rand(-9, 9),
+          at: -1e9,
+          kind: 0,
+          label: '',
+        });
+      }
+    }
 
     let fx = W * 0.5;
     let fy = H * 0.45;
@@ -60,118 +53,105 @@
       t += 0.0038;
       if (anim) {
         ptr.idle++;
-        spoke += 0.026;
+        spoke += 0.022;
       }
 
       const auto = !ptr.seen || ptr.idle > 200;
-      const tx = auto ? W * 0.5 + Math.cos(t) * W * 0.3 : ptr.x;
-      const ty = auto ? H * 0.5 + Math.sin(t * 1.4) * H * 0.32 : ptr.y;
-      const ease = anim ? 0.055 : 1;
+      const tx = auto ? W * 0.5 + Math.cos(t) * W * 0.32 : ptr.x;
+      const ty = auto ? H * 0.5 + Math.sin(t * 1.4) * H * 0.34 : ptr.y;
+      const ease = anim ? 0.05 : 1;
       fx += (tx - fx) * ease;
       fy += (ty - fy) * ease;
 
-      /* Sensor rings and the rotating sweep, drawn as a decaying trail. */
+      /* Address blocks: every eighth line of the lattice reads a little
+         stronger, so the field looks like a range rather than confetti. */
       c.lineWidth = 1;
+      c.strokeStyle = `rgba(${RED},.075)`;
+      for (let i = 0; i < cols; i += 8) {
+        c.beginPath();
+        c.moveTo(i * GAP, 0);
+        c.lineTo(i * GAP, H);
+        c.stroke();
+      }
+      for (let r = 0; r < rows; r += 8) {
+        c.beginPath();
+        c.moveTo(0, r * GAP);
+        c.lineTo(W, r * GAP);
+        c.stroke();
+      }
+
+      /* Sensor rings and the rotating sweep, drawn as a decaying trail. */
       for (const r of [REACH * 0.45, REACH]) {
-        c.strokeStyle = `rgba(${RED},.085)`;
+        c.strokeStyle = `rgba(${RED},.09)`;
         c.beginPath();
         c.arc(fx, fy, r, 0, 6.2832);
         c.stroke();
       }
-      for (let i = 0; i < 22; i++) {
-        const a = spoke - i * 0.06;
-        c.strokeStyle = `rgba(${RED},${((1 - i / 22) * 0.125).toFixed(3)})`;
+      for (let i = 0; i < 26; i++) {
+        const a = spoke - i * 0.05;
+        c.strokeStyle = `rgba(${RED},${((1 - i / 26) * 0.13).toFixed(3)})`;
         c.beginPath();
         c.moveTo(fx, fy);
         c.lineTo(fx + Math.cos(a) * REACH, fy + Math.sin(a) * REACH);
         c.stroke();
       }
 
-      for (const h of hosts) {
-        if (anim) {
-          h.hx += h.vx;
-          h.hy += h.vy;
-          if (h.hx < 0 || h.hx > W) h.vx *= -1;
-          if (h.hy < 0 || h.hy > H) h.vy *= -1;
-        }
-        const dx = h.hx - fx;
-        const dy = h.hy - fy;
-        const d = Math.hypot(dx, dy) || 1;
-        h.near = d < REACH ? 1 - d / REACH : 0;
-        const push = h.near * h.near * 30;
-        h.x = h.hx + (dx / d) * push;
-        h.y = h.hy + (dy / d) * push;
+      c.font = mono(9);
+      c.textBaseline = 'middle';
 
-        /* Probed when the spoke passes over it. */
-        if (anim && h.near > 0) {
+      for (const h of hosts) {
+        const dx = h.x - fx;
+        const dy = h.y - fy;
+        const d = Math.hypot(dx, dy);
+        const near = d < REACH ? 1 - d / REACH : 0;
+
+        if (anim && near > 0) {
           let da = Math.atan2(dy, dx) - (spoke % 6.2832);
           while (da < -3.1416) da += 6.2832;
           while (da > 3.1416) da -= 6.2832;
-          if (Math.abs(da) < 0.035) {
-            h.probed = f;
-            h.label = SERVICES[(Math.random() * SERVICES.length) | 0];
+          if (Math.abs(da) < 0.03) {
+            h.at = f;
+            const roll = Math.random();
+            h.kind = roll > 0.93 ? 2 : roll > 0.72 ? 1 : 0;
+            h.label =
+              h.kind === 2
+                ? FLAG[(Math.random() * FLAG.length) | 0]
+                : h.kind === 1
+                  ? OPEN[(Math.random() * OPEN.length) | 0]
+                  : '';
           }
         }
-      }
 
-      /* The subnet itself: quiet links between neighbouring hosts. */
-      for (let i = 0; i < hosts.length; i++) {
-        const p = hosts[i];
-        for (let j = i + 1; j < hosts.length; j++) {
-          const q = hosts[j];
-          const d = Math.hypot(q.x - p.x, q.y - p.y);
-          if (d >= LINK) continue;
-          const lift = Math.max(p.near, q.near);
-          c.strokeStyle = `rgba(${RED},${((1 - d / LINK) * (0.17 + lift * 0.34)).toFixed(3)})`;
-          c.beginPath();
-          c.moveTo(p.x, p.y);
-          c.lineTo(q.x, q.y);
-          c.stroke();
-        }
-      }
-
-      c.font = mono(9);
-      c.textBaseline = 'middle';
-      for (const h of hosts) {
-        const age = (f - h.probed) / 150;
+        const age = (f - h.at) / 240;
         const fresh = age < 1 ? 1 - age : 0;
 
-        c.fillStyle = `rgba(${RED},${(0.4 + h.near * 0.5 + fresh * 0.3).toFixed(3)})`;
-        c.beginPath();
-        c.arc(h.x, h.y, 1.35 + fresh * 1.4, 0, 6.2832);
-        c.fill();
-
-        if (h.flag) {
-          const pulse = 0.14 + Math.sin(f * 0.05 + h.hx) * 0.06;
-          c.strokeStyle = `rgba(${RED},${(pulse + fresh * 0.4).toFixed(3)})`;
-          c.beginPath();
-          c.arc(h.x, h.y, 6.5, 0, 6.2832);
-          c.stroke();
-        }
-
-        if (fresh > 0) {
-          const a = fresh * 0.55;
-          /* Corner brackets, then the service. */
+        if (fresh > 0 && h.kind === 2) {
+          const a = fresh * 0.75;
+          c.strokeStyle = `rgba(240,160,32,${a.toFixed(3)})`;
+          c.strokeRect(h.x - 5, h.y - 5, 10, 10);
+          c.fillStyle = `rgba(240,160,32,${(a * 0.85).toFixed(3)})`;
+          c.fillText(h.label, h.x + 10, h.y + 0.5);
+        } else if (fresh > 0 && h.kind === 1) {
+          const a = fresh * 0.6;
           c.strokeStyle = `rgba(${RED},${a.toFixed(3)})`;
           for (const s of [-1, 1]) {
             c.beginPath();
-            c.moveTo(h.x + s * 5, h.y - 5);
-            c.lineTo(h.x + s * 8, h.y - 5);
-            c.moveTo(h.x + s * 8, h.y - 5);
-            c.lineTo(h.x + s * 8, h.y + 5);
-            c.moveTo(h.x + s * 8, h.y + 5);
-            c.lineTo(h.x + s * 5, h.y + 5);
+            c.moveTo(h.x + s * 4, h.y - 5);
+            c.lineTo(h.x + s * 7, h.y - 5);
+            c.lineTo(h.x + s * 7, h.y + 5);
+            c.lineTo(h.x + s * 4, h.y + 5);
             c.stroke();
           }
           c.fillStyle = `rgba(255,140,150,${(a * 0.8).toFixed(3)})`;
-          c.fillText(h.label, h.x + 13, h.y + 0.5);
+          c.fillText(h.label, h.x + 11, h.y + 0.5);
         }
+
+        c.fillStyle = `rgba(${RED},${(0.26 + near * 0.32 + fresh * 0.45).toFixed(3)})`;
+        c.fillRect(h.x - 1, h.y - 1, 2, 2);
       }
 
       c.fillStyle = `rgba(255,190,195,${auto ? 0.3 : 0.75})`;
-      c.beginPath();
-      c.arc(fx, fy, 2, 0, 6.2832);
-      c.fill();
+      c.fillRect(fx - 2, fy - 2, 4, 4);
 
       drawClickRings(k);
     };

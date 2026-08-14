@@ -116,23 +116,30 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 `Backdrop.astro` paints the fixed layers — top and bottom glow, canvas, 46px
 grid, CRT scanline — and picks one scene per page. Each scene is its own
 component under `src/components/backdrops/`, so a page bundles only the one it
-uses (~1 KB gzip each) on top of the shared harness in `src/scripts/stage.ts`
-(~0.9 KB).
+uses (~1 KB gzip each) on top of the shared harness in `src/scripts/stage.ts`.
+
+The point is that every page gets a different **medium**, not the same motion
+rearranged — a scan field, a log, a hex dump, a tree, a matrix, a wireframe
+globe, a waveform:
 
 | Page | Scene | What it is |
 | --- | --- | --- |
-| `/` | `recon` | The pointer is a scanner: a spoke rotates around it, hosts it crosses get bracketed and labelled with a service, hosts lean away from it, a click pings. No pointer (mobile, or nobody has moved yet) and the scanner walks the viewport itself |
-| `/experience` | `trace` | Traceroute resolving hop by hop with latencies and the odd `* * *`, then fading and starting a new path |
-| `/research` | `spread` | A compromise propagating along the links between hosts until a patch wave sweeps the viewport and clears it |
-| `/projects` | `pipeline` | Build jobs moving stage to stage; some fail their gate and get marked |
-| `/certifications` | `cipher` | A permutation network — blocks travel lanes and swap at each round column, and the wiring reshuffles periodically |
-| `/travel` | `links` | Connections drawing themselves between endpoints, landing with a ring, then fading |
-| `/contact` | `handshake` | Pulses trading across a channel, sealing a block each pass, with a session ring every round |
+| `/` | `recon` | An address lattice under a rotating scan. The pointer carries the scanner; whatever the spoke crosses comes back closed, open with a service, or flagged. Nothing follows the cursor and nothing deforms around it. With no pointer the scan walks the viewport itself |
+| `/experience` | `authlog` | Access log entries appearing in fixed slots and fading — grants, role changes, the occasional denial. Nothing scrolls |
+| `/research` | `hexdump` | An `xxd`-style dump where bytes flip in place and a run occasionally goes out of bounds, gets bracketed with its offset, and is written back |
+| `/projects` | `deptree` | A dependency tree resolving top down with advisories and CVEs on some entries. Package names are invented — nothing points at a real project |
+| `/certifications` | `controls` | A control matrix assessed cell by cell: conformant, gap, or nonconformity, then cleared and reassessed |
+| `/travel` | `globe` | A wireframe globe in orthographic projection, turning for real, with the visited coordinates as markers that fade round the back |
+| `/contact` | `entropy` | Signal bands converting to ciphertext: dense noise behind an advancing boundary, the readable wave ahead of it |
+
+The hex dump paints its quiet layer once into an offscreen canvas and only
+clears and redraws the bytes that changed, so a wall of text costs almost
+nothing per frame.
 
 The harness owns device pixel ratio (capped at 2), a 180 ms debounced resize,
 pausing the rAF loop while the tab is hidden, pointer tracking, and reduced
 motion — where every scene draws one composed frame and never moves. Structural
-strokes stay under ~0.25 alpha; only small heads and labels go brighter.
+strokes stay low-alpha; only labels and the scan head go brighter.
 
 To add a scene: drop a component next to the others that calls `stage()`,
 register it in `Backdrop.astro`, and add its name to the `BackdropVariant`

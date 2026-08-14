@@ -1,0 +1,158 @@
+---
+/**
+ * Research — a hex dump under mutation.
+ *
+ * The dump itself is painted once into an offscreen canvas; each frame only
+ * the bytes that changed are cleared and redrawn, so a wall of text costs
+ * almost nothing. Bytes flip here and there, and every so often a run goes out
+ * of bounds, gets bracketed with its offset, and is then written back.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  const HEX = '0123456789abcdef';
+  const byte = () => (Math.random() * 256) | 0;
+  const hx = (v: number) => HEX[(v >> 4) & 15] + HEX[v & 15];
+  const printable = (v: number) => (v >= 33 && v <= 126 ? String.fromCharCode(v) : '.');
+
+  stage((k) => {
+    const { c, W, H, anim, RED, mono } = k;
+
+    const FS = 11;
+    const LH = 18;
+    const PER = 16;
+
+    c.font = mono(FS);
+    const ch = c.measureText('0').width || 6.6;
+    const pairW = ch * 3;
+    const offW = ch * 9;
+    const blockW = offW + pairW * PER + ch * 2 + ch * PER + ch * 4;
+
+    const blocks = Math.max(1, Math.floor(W / blockW));
+    const rows = Math.max(4, Math.floor(H / LH));
+    const total = blocks * rows * PER;
+
+    const data = new Uint8Array(total);
+    for (let i = 0; i < total; i++) data[i] = byte();
+
+    /* Where a byte sits on screen. */
+    const cellX = (i: number) => {
+      const b = Math.floor(i / (rows * PER));
+      const col = i % PER;
+      return b * blockW + offW + col * pairW;
+    };
+    const cellY = (i: number) => {
+      const b = Math.floor(i / (rows * PER));
+      const row = Math.floor((i - b * rows * PER) / PER);
+      return row * LH + LH * 0.5;
+    };
+    const asciiX = (i: number) => {
+      const b = Math.floor(i / (rows * PER));
+      const col = i % PER;
+      return b * blockW + offW + pairW * PER + ch * 2 + col * ch;
+    };
+
+    /* The quiet layer, drawn once. */
+    const dpr = c.canvas.width / W;
+    const base = document.createElement('canvas');
+    base.width = c.canvas.width;
+    base.height = c.canvas.height;
+    const b = base.getContext('2d')!;
+    b.setTransform(dpr, 0, 0, dpr, 0, 0);
+    b.font = mono(FS);
+    b.textBaseline = 'middle';
+    for (let i = 0; i < total; i++) {
+      const col = i % PER;
+      if (col === 0) {
+        b.fillStyle = 'rgba(150,150,162,.13)';
+        b.fillText(((i * 1) >>> 0).toString(16).padStart(8, '0'), cellX(i) - offW + ch, cellY(i));
+      }
+      b.fillStyle = `rgba(${RED},${col % 4 === 0 ? 0.11 : 0.075})`;
+      b.fillText(hx(data[i]), cellX(i), cellY(i));
+      b.fillStyle = 'rgba(150,150,162,.09)';
+      b.fillText(printable(data[i]), asciiX(i), cellY(i));
+    }
+
+    type Hit = { i: number; at: number; bad: boolean };
+    const hits: Hit[] = [];
+    let run: { from: number; len: number; at: number } | null = null;
+    let f = 0;
+
+    return () => {
+      f++;
+      c.drawImage(base, 0, 0, W, H);
+      c.font = mono(FS);
+      c.textBaseline = 'middle';
+
+      if (anim) {
+        for (let n = 0; n < 3; n++) {
+          const i = (Math.random() * total) | 0;
+          data[i] = byte();
+          hits.push({ i, at: f, bad: false });
+        }
+        if (!run && Math.random() < 0.004) {
+          const from = (Math.random() * (total - 20)) | 0;
+          run = { from: from - (from % PER), len: 6 + ((Math.random() * 10) | 0), at: f };
+          for (let j = 0; j < run.len; j++) {
+            data[run.from + j] = byte();
+            hits.push({ i: run.from + j, at: f, bad: true });
+          }
+        }
+        if (run && f - run.at > 260) {
+          for (let j = 0; j < run.len; j++) hits.push({ i: run.from + j, at: f, bad: false });
+          run = null;
+        }
+      }
+
+      for (let n = hits.length - 1; n >= 0; n--) {
+        const h = hits[n];
+        const life = h.bad ? 300 : 90;
+        const u = (f - h.at) / life;
+        if (u >= 1) {
+          hits.splice(n, 1);
+          continue;
+        }
+        const a = 1 - u;
+        const x = cellX(h.i);
+        const y = cellY(h.i);
+
+        c.clearRect(x - 2, y - LH * 0.5 + 2, pairW, LH - 4);
+        c.clearRect(asciiX(h.i) - 1, y - LH * 0.5 + 2, ch + 2, LH - 4);
+
+        if (h.bad) {
+          c.fillStyle = `rgba(${RED},${(0.25 + a * 0.6).toFixed(3)})`;
+          c.fillText(hx(data[h.i]), x, y);
+          c.fillStyle = `rgba(${RED},${(0.2 + a * 0.4).toFixed(3)})`;
+          c.fillText(printable(data[h.i]), asciiX(h.i), y);
+        } else {
+          c.fillStyle = `rgba(255,150,160,${(0.12 + a * 0.55).toFixed(3)})`;
+          c.fillText(hx(data[h.i]), x, y);
+          c.fillStyle = `rgba(150,150,162,${(0.12 + a * 0.25).toFixed(3)})`;
+          c.fillText(printable(data[h.i]), asciiX(h.i), y);
+        }
+      }
+
+      if (run) {
+        const a = Math.max(0, 1 - (f - run.at) / 300);
+        const x0 = cellX(run.from) - 4;
+        const y = cellY(run.from);
+        const last = run.from + run.len - 1;
+        const wide = Math.floor(run.from / PER) !== Math.floor(last / PER);
+        const x1 = wide ? cellX(run.from - (run.from % PER) + PER - 1) + pairW : cellX(last) + pairW - ch;
+
+        c.strokeStyle = `rgba(${RED},${(a * 0.5).toFixed(3)})`;
+        c.lineWidth = 1;
+        c.strokeRect(x0, y - LH * 0.5 + 1, x1 - x0, LH - 2);
+
+        c.fillStyle = `rgba(240,160,32,${(a * 0.6).toFixed(3)})`;
+        c.fillText(
+          `+0x${run.from.toString(16)}  out-of-bounds write`,
+          x0,
+          y - LH
+        );
+      }
+    };
+  });
+</script>

@@ -8,29 +8,31 @@
  *
  * Every layer is pointer-events:none and sits below the z-index:2 content, and
  * because the canvas is position:fixed the scene covers the viewport at any
- * scroll position — the motion never runs out halfway down a long page.
+ * scroll position.
  *
- * Each scene is its own component so only the one a page uses is bundled into
- * that page; they share the harness in src/scripts/stage.ts.
+ * Each page gets a different *medium*, not the same motion rearranged: a scan
+ * field, a log, a hex dump, a tree, a matrix, a wireframe globe, a waveform.
+ * Scenes are separate components so a page bundles only the one it uses; they
+ * share the harness in src/scripts/stage.ts.
  *
- *   recon      — pointer-driven scan sweep, probing hosts      (/)
- *   trace      — traceroute resolving hop by hop               (/experience)
- *   spread     — compromise propagating, then a patch wave     (/research)
- *   pipeline   — build jobs moving through stage gates         (/projects)
- *   cipher     — permutation network shuffling lanes           (/certifications)
- *   links      — connections opening between endpoints         (/travel)
- *   handshake  — key exchange across a channel                 (/contact)
+ *   recon    — address space under a rotating scan     (/)
+ *   authlog  — access log entries granting and denying (/experience)
+ *   hexdump  — bytes mutating, a run going out of bounds (/research)
+ *   deptree  — dependency tree resolving with advisories (/projects)
+ *   controls — control matrix being assessed cell by cell (/certifications)
+ *   globe    — wireframe globe turning                 (/travel)
+ *   entropy  — signal bands converting to ciphertext   (/contact)
  */
 import Recon from './backdrops/Recon.astro';
-import Trace from './backdrops/Trace.astro';
-import Spread from './backdrops/Spread.astro';
-import Pipeline from './backdrops/Pipeline.astro';
-import Cipher from './backdrops/Cipher.astro';
-import Links from './backdrops/Links.astro';
-import Handshake from './backdrops/Handshake.astro';
+import Authlog from './backdrops/Authlog.astro';
+import Hexdump from './backdrops/Hexdump.astro';
+import Deptree from './backdrops/Deptree.astro';
+import Controls from './backdrops/Controls.astro';
+import Globe from './backdrops/Globe.astro';
+import Entropy from './backdrops/Entropy.astro';
 
 interface Props {
-  variant?: 'recon' | 'trace' | 'spread' | 'pipeline' | 'cipher' | 'links' | 'handshake';
+  variant?: 'recon' | 'authlog' | 'hexdump' | 'deptree' | 'controls' | 'globe' | 'entropy';
 }
 
 const { variant = 'recon' } = Astro.props;
@@ -43,9 +45,9 @@ const { variant = 'recon' } = Astro.props;
 <div class="bg-scan" aria-hidden="true"></div>
 
 {variant === 'recon' && <Recon />}
-{variant === 'trace' && <Trace />}
-{variant === 'spread' && <Spread />}
-{variant === 'pipeline' && <Pipeline />}
-{variant === 'cipher' && <Cipher />}
-{variant === 'links' && <Links />}
-{variant === 'handshake' && <Handshake />}
+{variant === 'authlog' && <Authlog />}
+{variant === 'hexdump' && <Hexdump />}
+{variant === 'deptree' && <Deptree />}
+{variant === 'controls' && <Controls />}
+{variant === 'globe' && <Globe />}
+{variant === 'entropy' && <Entropy />}

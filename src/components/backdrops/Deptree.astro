@@ -1,0 +1,136 @@
+---
+/**
+ * Projects — a dependency tree being audited.
+ *
+ * The tree resolves top down, one entry at a time, connectors drawn as real
+ * segments rather than glyphs. Most entries pass, some carry an advisory, a
+ * few carry a CVE. When the tree finishes it fades and another one resolves.
+ * Package names are invented on purpose — nothing here points at a real
+ * project.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  const HEAD = ['core', 'net', 'crypto', 'parse', 'stream', 'auth', 'proto', 'codec', 'queue', 'vault', 'trace', 'shim'];
+  const TAIL = ['utils', 'kit', 'core', 'sdk', 'lite', 'io', 'runtime', 'client', 'bridge'];
+
+  stage((k) => {
+    const { c, W, H, anim, rand, RED, mono } = k;
+
+    const LH = 21;
+    const INDENT = 15;
+    const rows = Math.max(6, Math.floor(H / LH) - 1);
+
+    c.font = mono(11);
+    const colW = Math.min(360, Math.max(250, W * 0.28));
+    const columns = Math.max(1, Math.min(3, Math.floor(W / (colW + 40))));
+
+    type Entry = { d: number; name: string; status: 0 | 1 | 2; parent: number };
+
+    const build = (): Entry[] => {
+      const out: Entry[] = [
+        { d: 0, name: `${HEAD[(Math.random() * HEAD.length) | 0]}-${TAIL[(Math.random() * TAIL.length) | 0]}@2.${(Math.random() * 9) | 0}.0`, status: 0, parent: -1 },
+      ];
+      for (let i = 1; i < rows; i++) {
+        const prev = out[i - 1];
+        let d = prev.d;
+        const roll = Math.random();
+        if (roll < 0.34) d = Math.min(4, prev.d + 1);
+        else if (roll > 0.76) d = Math.max(1, prev.d - 1);
+        d = Math.max(1, d);
+        let parent = -1;
+        for (let j = i - 1; j >= 0; j--) {
+          if (out[j].d === d - 1) {
+            parent = j;
+            break;
+          }
+        }
+        const s = Math.random();
+        out.push({
+          d,
+          name: `${HEAD[(Math.random() * HEAD.length) | 0]}-${TAIL[(Math.random() * TAIL.length) | 0]}@${(Math.random() * 6) | 0}.${(Math.random() * 20) | 0}.${(Math.random() * 9) | 0}`,
+          status: s > 0.94 ? 2 : s > 0.8 ? 1 : 0,
+          parent,
+        });
+      }
+      return out;
+    };
+
+    type Col = { x: number; entries: Entry[]; shown: number; wait: number; fade: number };
+    const cols: Col[] = Array.from({ length: columns }, (_, i) => ({
+      x: (W / columns) * i + Math.min(60, W * 0.04),
+      entries: build(),
+      shown: (rand(rows * 0.45, rows) | 0),
+      wait: 0,
+      fade: 0,
+    }));
+
+    let f = 0;
+
+    return () => {
+      f++;
+      c.font = mono(11);
+      c.textBaseline = 'middle';
+      c.lineWidth = 1;
+
+      for (const col of cols) {
+        if (anim) {
+          if (col.shown < col.entries.length) {
+            if (f % 9 === 0) col.shown++;
+          } else if (col.wait < 150) col.wait++;
+          else {
+            col.fade += 0.008;
+            if (col.fade >= 1) {
+              col.entries = build();
+              col.shown = 0;
+              col.wait = 0;
+              col.fade = 0;
+            }
+          }
+        }
+
+        const alive = 1 - col.fade;
+
+        for (let i = 0; i < col.shown; i++) {
+          const e = col.entries[i];
+          const x = col.x + e.d * INDENT;
+          const y = i * LH + LH;
+
+          if (e.parent >= 0) {
+            const px = col.x + col.entries[e.parent].d * INDENT + 4;
+            const py = col.entries[e.parent].d * 0 + e.parent * LH + LH + 6;
+            c.strokeStyle = `rgba(150,150,162,${(0.16 * alive).toFixed(3)})`;
+            c.beginPath();
+            c.moveTo(px, py);
+            c.lineTo(px, y);
+            c.lineTo(x - 4, y);
+            c.stroke();
+          }
+
+          const glow = i === col.shown - 1 ? 1 : 0;
+          const tone =
+            e.status === 2
+              ? `rgba(${RED},${(0.4 * alive).toFixed(3)})`
+              : e.status === 1
+                ? `rgba(240,160,32,${(0.3 * alive).toFixed(3)})`
+                : `rgba(150,150,162,${((0.17 + glow * 0.2) * alive).toFixed(3)})`;
+          c.fillStyle = tone;
+          c.fillText(e.name, x, y);
+
+          const w = c.measureText(e.name).width;
+          if (e.status === 2) {
+            c.fillStyle = `rgba(${RED},${(0.5 * alive).toFixed(3)})`;
+            c.fillText('cve', x + w + 10, y);
+            c.strokeStyle = `rgba(${RED},${(0.3 * alive).toFixed(3)})`;
+            c.strokeRect(x + w + 6, y - 7, 26, 14);
+          } else if (e.status === 1) {
+            c.fillStyle = `rgba(240,160,32,${(0.4 * alive).toFixed(3)})`;
+            c.fillText('advisory', x + w + 10, y);
+          }
+        }
+      }
+    };
+  });
+</script>
