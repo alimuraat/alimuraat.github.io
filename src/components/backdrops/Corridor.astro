@@ -1,0 +1,135 @@
+---
+/**
+ * Home — a corridor you are moving down.
+ *
+ * Floor and ceiling grids running to a vanishing point, structural ribs every
+ * few units, and a drifting cloud of motes between them. The camera moves
+ * forward at a constant rate and the grid wraps, so the corridor never ends;
+ * the pointer steers the look direction, which parallaxes everything against
+ * everything else. That parallax is the depth cue doing the work — nothing
+ * here is a flat pattern.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+  import { projector, type Cam } from '../../scripts/space';
+
+  stage(
+    (k) => {
+      const { c, W, H, anim, ptr, RED } = k;
+
+      const project = projector(W, H, 0.5, 0.52);
+      const DEPTH = 60;
+      const STEP = 2.4;
+      const HALF = 5;
+      const FLOOR = -2.3;
+      const ROOF = 2.7;
+
+      const cam: Cam = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, fov: Math.min(W, H) * 0.4 };
+      let yaw = 0;
+      let pitch = 0;
+      let t = 0;
+
+      const motes = Array.from({ length: 220 }, () => ({
+        x: (Math.random() - 0.5) * HALF * 1.9,
+        y: (Math.random() - 0.5) * (ROOF - FLOOR) * 0.9 + 0.2,
+        z: Math.random() * DEPTH,
+        r: 0.6 + Math.random() * 1.4,
+      }));
+
+      return () => {
+        t += 0.0035;
+        if (anim) {
+          ptr.idle++;
+          cam.z += 0.075;
+        }
+        const auto = !ptr.seen || ptr.idle > 240;
+        const ty = auto ? Math.sin(t * 1.6) * 0.16 : (ptr.x / W - 0.5) * 0.42;
+        const tp = auto ? Math.cos(t * 1.1) * 0.07 : (ptr.y / H - 0.5) * -0.2;
+        yaw += (ty - yaw) * 0.035;
+        pitch += (tp - pitch) * 0.035;
+        cam.yaw = yaw;
+        cam.pitch = pitch;
+
+        const p = project(cam);
+        const z0 = Math.floor(cam.z / STEP) * STEP;
+        const fade = (z: number) => Math.max(0, 1 - (z - cam.z) / DEPTH);
+
+        /* Rails running away from you. */
+        for (const y of [FLOOR, ROOF]) {
+          for (let i = -HALF; i <= HALF; i += 1) {
+            const a = p(i, y, cam.z + 2.2);
+            const b = p(i, y, cam.z + DEPTH);
+            if (!a || !b) continue;
+            const edge = 1 - Math.abs(i) / HALF;
+            c.lineWidth = 1;
+            c.strokeStyle = `rgba(${RED},${(0.12 + edge * 0.22).toFixed(3)})`;
+            c.beginPath();
+            c.moveTo(a.x, a.y);
+            c.lineTo(b.x, b.y);
+            c.stroke();
+          }
+        }
+
+        /* Cross members, and every fourth one a full rib around the tunnel. */
+        for (let z = z0; z < cam.z + DEPTH; z += STEP) {
+          const f = fade(z);
+          if (f <= 0) continue;
+          const rib = Math.round(z / STEP) % 4 === 0;
+
+          for (const y of [FLOOR, ROOF]) {
+            const a = p(-HALF, y, z);
+            const b = p(HALF, y, z);
+            if (!a || !b) continue;
+            c.lineWidth = rib ? 1.8 : 1;
+            c.strokeStyle = `rgba(${RED},${((rib ? 0.6 : 0.18) * f).toFixed(3)})`;
+            c.beginPath();
+            c.moveTo(a.x, a.y);
+            c.lineTo(b.x, b.y);
+            c.stroke();
+          }
+
+          if (rib) {
+            const c1 = p(-HALF, FLOOR, z);
+            const c2 = p(-HALF, ROOF, z);
+            const c3 = p(HALF, ROOF, z);
+            const c4 = p(HALF, FLOOR, z);
+            if (c1 && c2 && c3 && c4) {
+              c.lineWidth = 1.8;
+              c.strokeStyle = `rgba(${RED},${(0.55 * f).toFixed(3)})`;
+              c.beginPath();
+              c.moveTo(c1.x, c1.y);
+              c.lineTo(c2.x, c2.y);
+              c.moveTo(c4.x, c4.y);
+              c.lineTo(c3.x, c3.y);
+              c.stroke();
+            }
+          }
+        }
+
+        /* Motes, recycled behind you as you pass them. */
+        for (const m of motes) {
+          if (m.z < cam.z + 1) m.z += DEPTH;
+          const q = p(m.x, m.y, m.z);
+          if (!q) continue;
+          const f = fade(m.z);
+          const r = Math.max(0.6, m.r * q.s * 0.012);
+          c.fillStyle = `rgba(255,150,160,${(0.16 + f * 0.5).toFixed(3)})`;
+          c.fillRect(q.x - r, q.y - r, r * 2, r * 2);
+        }
+
+        /* The far end, so the vanishing point reads as a place. */
+        const v = p(0, (FLOOR + ROOF) / 2, cam.z + DEPTH);
+        if (v) {
+          const g = c.createRadialGradient(v.x, v.y, 0, v.x, v.y, Math.min(W, H) * 0.3);
+          g.addColorStop(0, `rgba(${RED},.3)`);
+          g.addColorStop(1, `rgba(${RED},0)`);
+          c.fillStyle = g;
+          c.fillRect(v.x - W, v.y - H, W * 2, H * 2);
+        }
+      };
+    },
+    { additive: true }
+  );
+</script>

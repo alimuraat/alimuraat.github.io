@@ -1,0 +1,134 @@
+---
+/**
+ * Backdrop lab — one page per scene, so they can be judged full screen with
+ * real copy over them instead of described in a message. Not linked from the
+ * site and noindex; delete src/pages/lab/ once the set is chosen.
+ */
+import Backdrop from '../../components/Backdrop.astro';
+import { SCENES } from '../../scenes';
+
+import '../../styles/tokens.css';
+import '../../styles/fonts.css';
+import '../../styles/base.css';
+
+export function getStaticPaths() {
+  return [
+    'corridor',
+    'chords',
+    'hyperbolic',
+    'attractor',
+    'harmonograph',
+    'diffusion',
+    'truchet',
+    'guilloche',
+    'geodesic',
+    'chladni',
+  ].map((scene) => ({ params: { scene } }));
+}
+
+const { scene } = Astro.params as { scene: string };
+const i = SCENES.indexOf(scene as never);
+const next = SCENES[(i + 1) % SCENES.length];
+const prev = SCENES[(i - 1 + SCENES.length) % SCENES.length];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{scene} — backdrop lab</title>
+    <meta name="theme-color" content="#070708" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <Backdrop variant={scene as never} />
+
+    <nav class="lab-bar">
+      {
+        SCENES.map((s) => (
+          <a href={`/lab/${s}/`} aria-current={s === scene ? 'page' : undefined}>
+            {s}
+          </a>
+        ))
+      }
+    </nav>
+
+    <main class="lab-main">
+      <p class="eyebrow">{`${i + 1} / ${SCENES.length}`}</p>
+      <div class="stack s-h1">
+        <h1 class="layer">{scene}</h1>
+        <span class="layer l2" aria-hidden="true" data-text={scene}></span>
+        <span class="layer l3" aria-hidden="true" data-text={scene}></span>
+      </div>
+
+      <p class="lede">
+        Real copy at the real size, so the only question left is whether this is
+        the one. Five years across offensive security, application security and
+        governance — from securing a 100M-download mobile ecosystem to running an
+        enterprise ISMS.
+      </p>
+
+      <div class="grid">
+        <article class="card">
+          <h3>Readability check</h3>
+          <span class="year">card over the scene</span>
+          <p>
+            Cards carry their own background, so the test is the paragraph above
+            and the small print below, not this.
+          </p>
+        </article>
+        <article class="card">
+          <h3>Movement check</h3>
+          <span class="year">give it ten seconds</span>
+          <p>Several of these build up or re-form on a cycle rather than looping quickly.</p>
+        </article>
+      </div>
+
+      <p class="note">
+        Small print sits here — the hardest thing to keep legible over a bright
+        backdrop, and the reason the content column is scrimmed.
+      </p>
+
+      <nav class="cta">
+        <a href={`/lab/${prev}/`}>← {prev}</a>
+        <a href={`/lab/${next}/`}>{next} →</a>
+        <a href="/">back to the site</a>
+      </nav>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  .lab-bar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 12px clamp(20px, 5vw, 80px);
+    background: rgba(7, 7, 8, .84);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .lab-bar a {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    text-decoration: none;
+    color: var(--ink-faint);
+    padding: 6px 9px;
+    border: 1px solid transparent;
+  }
+  .lab-bar a:hover { color: var(--ink); border-color: var(--line-hot); }
+  .lab-bar a[aria-current] { color: var(--sig); border-color: var(--line-hot); }
+  .lab-main {
+    position: relative;
+    z-index: 2;
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding: 90px clamp(20px, 5vw, 80px) 140px;
+  }
+</style>

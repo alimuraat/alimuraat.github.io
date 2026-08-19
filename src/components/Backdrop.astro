@@ -24,6 +24,9 @@
  */
 
 import Attractor from './backdrops/Attractor.astro';
+import Corridor from './backdrops/Corridor.astro';
+import Chords from './backdrops/Chords.astro';
+import Hyperbolic from './backdrops/Hyperbolic.astro';
 import Harmonograph from './backdrops/Harmonograph.astro';
 import Diffusion from './backdrops/Diffusion.astro';
 import Truchet from './backdrops/Truchet.astro';
@@ -32,7 +35,7 @@ import Geodesic from './backdrops/Geodesic.astro';
 import Chladni from './backdrops/Chladni.astro';
 
 interface Props {
-  variant?: 'attractor' | 'harmonograph' | 'diffusion' | 'truchet' | 'guilloche' | 'geodesic' | 'chladni';
+  variant?: 'corridor' | 'chords' | 'hyperbolic' | 'attractor' | 'harmonograph' | 'diffusion' | 'truchet' | 'guilloche' | 'geodesic' | 'chladni';
 }
 
 const { variant = 'attractor' } = Astro.props;
@@ -45,6 +48,9 @@ const { variant = 'attractor' } = Astro.props;
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-scan" aria-hidden="true"></div>
 
+{variant === 'corridor' && <Corridor />}
+{variant === 'chords' && <Chords />}
+{variant === 'hyperbolic' && <Hyperbolic />}
 {variant === 'attractor' && <Attractor />}
 {variant === 'harmonograph' && <Harmonograph />}
 {variant === 'diffusion' && <Diffusion />}

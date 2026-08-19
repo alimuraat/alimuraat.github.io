@@ -1,0 +1,82 @@
+---
+/**
+ * The Poincare disk.
+ *
+ * Inside the disk a straight line is a circular arc that meets the boundary at
+ * a right angle: for two boundary points an angle Δ apart, that arc has its
+ * centre at 1/cos(Δ/2) along the bisector and radius tan(Δ/2). Draw a few
+ * hundred of them and you get the web that hyperbolic space actually looks
+ * like — everything crowds toward an edge it never reaches, which is why the
+ * detail gets finer and finer the further out you look, without ever ending.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage(
+    (k) => {
+      const { c, W, H, anim, rand, RED } = k;
+
+      const cx = W > 900 ? W * 0.62 : W * 0.5;
+      const cy = H * 0.5;
+      const R = Math.min(W * 0.38, H * 0.46);
+
+      /* Each geodesic is remembered by its two boundary angles. */
+      const lines = Array.from({ length: 260 }, () => {
+        const a = rand(0, 6.2832);
+        const gap = rand(0.5, 2.5);
+        return { a, gap, sp: rand(-0.0022, 0.0022), w: rand(0, 1) };
+      });
+
+      let t = 0;
+
+      return () => {
+        t += 0.004;
+
+        /* The boundary. */
+        c.lineWidth = 1.6;
+        c.strokeStyle = `rgba(${RED},.3)`;
+        c.beginPath();
+        c.arc(cx, cy, R, 0, 6.2832);
+        c.stroke();
+
+        c.lineWidth = 1;
+        for (const g of lines) {
+          if (anim) g.a += g.sp;
+          const half = g.gap / 2;
+          const cosh = Math.cos(half);
+          if (Math.abs(cosh) < 0.06) continue;
+
+          /* Centre and radius of the orthogonal circle, in disk units. */
+          const d = 1 / cosh;
+          const rr = Math.abs(Math.tan(half));
+          const mid = g.a + half;
+          const ox = cx + Math.cos(mid) * d * R;
+          const oy = cy + Math.sin(mid) * d * R;
+          const rad = rr * R;
+
+          /* Only the span inside the disk is a geodesic. */
+          const from = mid + Math.PI - (Math.PI / 2 - half);
+          const to = mid + Math.PI + (Math.PI / 2 - half);
+
+          const lit = 0.5 + 0.5 * Math.sin(t * 1.6 + g.w * 6.2832);
+          c.strokeStyle = `rgba(${RED},${(0.09 + lit * 0.22).toFixed(3)})`;
+          c.beginPath();
+          c.arc(ox, oy, rad, from, to);
+          c.stroke();
+        }
+
+        /* A few rings of the same geometry, concentric about the centre, to
+           give the eye something to hold on to. */
+        c.strokeStyle = `rgba(255,150,160,.1)`;
+        for (let i = 1; i <= 5; i++) {
+          c.beginPath();
+          c.arc(cx, cy, R * (i / 6) ** 1.6, 0, 6.2832);
+          c.stroke();
+        }
+      };
+    },
+    { additive: true }
+  );
+</script>
