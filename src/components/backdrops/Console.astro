@@ -1,0 +1,385 @@
+---
+/**
+ * The backdrop as instrumentation rather than as a picture.
+ *
+ * Nothing fills the viewport. There is a measuring frame around the edges —
+ * rulers, corner brackets, sparse registration marks, and a dimension line
+ * that occasionally appears to measure something and then goes away — and one
+ * small instrument in the lower right, different on every page and about what
+ * that page is.
+ *
+ * Everything is drawn plainly, no additive light and no trails: the point is
+ * that it reads as a drawing, not as an effect.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  type Kind = 'scan' | 'track' | 'severity' | 'pipeline' | 'seal' | 'globe' | 'handshake';
+
+  const CAPTION: Record<Kind, string> = {
+    scan: 'sweep · 60 hosts',
+    track: '2017 → now',
+    severity: 'severity',
+    pipeline: 'pipeline',
+    seal: 'conformant',
+    globe: '19 cities · 8 countries',
+    handshake: 'pgp on request',
+  };
+
+  const NOTES: Record<Kind, string[]> = {
+    scan: ['surface', 'in scope', 'reachable'],
+    track: ['five years', 'reverse order'],
+    severity: ['embargoed', 'coordinated'],
+    pipeline: ['shift left', 'gated'],
+    seal: ['iso 27001', 'iso/iec 42001'],
+    globe: ['wgs 84', 'great circle'],
+    handshake: ['encrypted', 'out of band'],
+  };
+
+  stage(
+    (k) => {
+      const { c, W, H, anim, RED, mono } = k;
+
+      const kind = ((document.getElementById('net') as HTMLCanvasElement).dataset.variant ??
+        'scan') as Kind;
+
+      const INSET = Math.min(46, W * 0.05);
+      const LINE = 'rgba(150,150,162,';
+      const box = Math.min(178, Math.max(120, Math.min(W, H) * 0.19));
+      const bx = W - INSET - box;
+      const by = H - INSET - box;
+
+      /* Registration marks, laid out once. */
+      const marks: [number, number][] = [];
+      const gap = 236;
+      for (let y = gap * 0.5; y < H; y += gap) {
+        for (let x = gap * 0.5; x < W; x += gap) marks.push([x, y]);
+      }
+
+      /* One dimension callout at a time, appearing every so often. */
+      let dim: { y: number; x0: number; x1: number; t: number; label: string } | null = null;
+      const notes = NOTES[kind];
+
+      let f = 0;
+
+      const tick = (x: number, y: number, dx: number, dy: number, len: number, a: number) => {
+        c.strokeStyle = `${LINE}${a})`;
+        c.beginPath();
+        c.moveTo(x, y);
+        c.lineTo(x + dx * len, y + dy * len);
+        c.stroke();
+      };
+
+      return () => {
+        f++;
+        c.lineWidth = 1;
+        c.font = mono(8);
+        c.textBaseline = 'middle';
+
+        /* Rulers along the top and left edges. */
+        for (let x = 0; x < W; x += 20) {
+          const major = x % 100 === 0;
+          tick(x + 0.5, 0, 0, 1, major ? 9 : 4, major ? 0.13 : 0.075);
+          if (x % 200 === 0 && x > 0) {
+            c.fillStyle = `${LINE}.13)`;
+            c.fillText(String(x), x + 4, 16);
+          }
+        }
+        for (let y = 0; y < H; y += 20) {
+          const major = y % 100 === 0;
+          tick(0, y + 0.5, 1, 0, major ? 9 : 4, major ? 0.13 : 0.075);
+        }
+
+        /* Corner brackets. */
+        const B = 26;
+        const P = 18;
+        c.strokeStyle = `rgba(${RED},.24)`;
+        for (const [x, y, sx, sy] of [
+          [P, P, 1, 1],
+          [W - P, P, -1, 1],
+          [P, H - P, 1, -1],
+          [W - P, H - P, -1, -1],
+        ] as [number, number, number, number][]) {
+          c.beginPath();
+          c.moveTo(x + sx * B, y);
+          c.lineTo(x, y);
+          c.lineTo(x, y + sy * B);
+          c.stroke();
+        }
+
+        /* Registration marks. */
+        c.strokeStyle = `${LINE}.09)`;
+        c.beginPath();
+        for (const [x, y] of marks) {
+          c.moveTo(x - 4, y);
+          c.lineTo(x + 4, y);
+          c.moveTo(x, y - 4);
+          c.lineTo(x, y + 4);
+        }
+        c.stroke();
+
+        /* A dimension line, now and then. */
+        if (anim && !dim && f % 620 === 0) {
+          dim = {
+            y: 120 + Math.random() * (H - 300),
+            x0: INSET + 10,
+            x1: W * (0.34 + Math.random() * 0.3),
+            t: 0,
+            label: notes[(Math.random() * notes.length) | 0],
+          };
+        }
+        if (dim) {
+          if (anim) dim.t += 0.006;
+          if (dim.t >= 1) dim = null;
+          else {
+            const a = (dim.t < 0.16 ? dim.t / 0.16 : dim.t > 0.7 ? (1 - dim.t) / 0.3 : 1) * 0.34;
+            const { y, x0, x1 } = dim;
+            c.strokeStyle = `rgba(${RED},${a.toFixed(3)})`;
+            c.beginPath();
+            c.moveTo(x0, y);
+            c.lineTo(x1, y);
+            for (const [x, s] of [
+              [x0, 1],
+              [x1, -1],
+            ] as [number, number][]) {
+              c.moveTo(x, y - 4);
+              c.lineTo(x, y + 4);
+              c.moveTo(x, y);
+              c.lineTo(x + s * 6, y - 3);
+              c.moveTo(x, y);
+              c.lineTo(x + s * 6, y + 3);
+            }
+            c.stroke();
+            c.fillStyle = `rgba(${RED},${(a * 0.9).toFixed(3)})`;
+            c.fillText(dim.label, x0 + 8, y - 9);
+          }
+        }
+
+        /* ------------------------------------------------ the instrument --- */
+        c.save();
+        c.translate(bx, by);
+
+        c.strokeStyle = `${LINE}.16)`;
+        c.strokeRect(0.5, 0.5, box, box);
+        c.strokeStyle = `rgba(${RED},.3)`;
+        c.beginPath();
+        c.moveTo(0.5, 12);
+        c.lineTo(0.5, 0.5);
+        c.lineTo(12, 0.5);
+        c.stroke();
+
+        c.fillStyle = `${LINE}.4)`;
+        c.fillText(CAPTION[kind], 4, box + 11);
+
+        const s = box;
+
+        if (kind === 'scan') {
+          /* A sweep over a small block of hosts. */
+          const cols = 10;
+          const rows = 6;
+          const cw = (s - 20) / cols;
+          const ch = (s - 30) / rows;
+          const head = anim ? (f * 0.035) % (cols + 4) : 3;
+          for (let r = 0; r < rows; r++) {
+            for (let i = 0; i < cols; i++) {
+              const d = head - i;
+              const lit = d > 0 && d < 3 ? 1 - d / 3 : 0;
+              const open = ((i * 7 + r * 13) % 11) === 0;
+              const x = 10 + i * cw;
+              const y = 20 + r * ch;
+              c.strokeStyle = open
+                ? `rgba(${RED},${(0.3 + lit * 0.5).toFixed(3)})`
+                : `${LINE}${(0.14 + lit * 0.4).toFixed(3)})`;
+              c.strokeRect(x + 0.5, y + 0.5, cw - 4, ch - 4);
+              if (open && lit > 0.4) {
+                c.fillStyle = `rgba(${RED},${(lit * 0.5).toFixed(3)})`;
+                c.fillRect(x + 1, y + 1, cw - 5, ch - 5);
+              }
+            }
+          }
+        } else if (kind === 'track') {
+          /* Five notches, newest at the right, the marker parked on it. */
+          const y = s * 0.6;
+          c.strokeStyle = `${LINE}.24)`;
+          c.beginPath();
+          c.moveTo(12, y);
+          c.lineTo(s - 12, y);
+          c.stroke();
+          const years = ['17', '21', '22', '23', '24'];
+          for (let i = 0; i < 5; i++) {
+            const x = 12 + ((s - 24) / 4) * i;
+            const now = i === 4;
+            c.strokeStyle = now ? `rgba(${RED},.55)` : `${LINE}.3)`;
+            c.beginPath();
+            c.moveTo(x, y - (now ? 12 : 6));
+            c.lineTo(x, y + (now ? 12 : 6));
+            c.stroke();
+            c.fillStyle = now ? `rgba(${RED},.5)` : `${LINE}.28)`;
+            c.fillText(years[i], x - 5, y + 22);
+          }
+          const pulse = anim ? 0.5 + 0.5 * Math.sin(f * 0.05) : 1;
+          c.fillStyle = `rgba(${RED},${(0.3 + pulse * 0.5).toFixed(3)})`;
+          c.fillRect(s - 15, y - 3, 6, 6);
+        } else if (kind === 'severity') {
+          /* A dial that settles on a score. */
+          const cxx = s / 2;
+          const cyy = s * 0.66;
+          const r = s * 0.36;
+          c.strokeStyle = `${LINE}.2)`;
+          c.beginPath();
+          c.arc(cxx, cyy, r, Math.PI, 0);
+          c.stroke();
+          for (let i = 0; i <= 10; i++) {
+            const a = Math.PI + (i / 10) * Math.PI;
+            const len = i % 5 === 0 ? 8 : 4;
+            c.strokeStyle = i > 7 ? `rgba(${RED},.4)` : `${LINE}.22)`;
+            c.beginPath();
+            c.moveTo(cxx + Math.cos(a) * r, cyy + Math.sin(a) * r);
+            c.lineTo(cxx + Math.cos(a) * (r - len), cyy + Math.sin(a) * (r - len));
+            c.stroke();
+          }
+          const target = 0.62 + 0.3 * (0.5 + 0.5 * Math.sin(f * 0.004));
+          const a = Math.PI + target * Math.PI;
+          c.strokeStyle = `rgba(${RED},.6)`;
+          c.beginPath();
+          c.moveTo(cxx, cyy);
+          c.lineTo(cxx + Math.cos(a) * (r - 12), cyy + Math.sin(a) * (r - 12));
+          c.stroke();
+          c.fillStyle = `rgba(${RED},.55)`;
+          c.font = mono(11);
+          c.fillText((target * 10).toFixed(1), cxx - 9, cyy + 16);
+          c.font = mono(8);
+        } else if (kind === 'pipeline') {
+          /* Five gates, one job walking through them. */
+          const y = s * 0.5;
+          const n = 5;
+          const step = (s - 30) / (n - 1);
+          c.strokeStyle = `${LINE}.2)`;
+          c.beginPath();
+          c.moveTo(15, y);
+          c.lineTo(s - 15, y);
+          c.stroke();
+          const at = anim ? (f * 0.006) % n : 1.4;
+          for (let i = 0; i < n; i++) {
+            const x = 15 + step * i;
+            const lit = Math.max(0, 1 - Math.abs(at - i) * 1.6);
+            c.strokeStyle = `rgba(${RED},${(0.2 + lit * 0.55).toFixed(3)})`;
+            c.strokeRect(x - 5.5, y - 5.5, 11, 11);
+            if (i === 3 && lit > 0.5) {
+              c.strokeStyle = `rgba(240,160,32,${(lit * 0.7).toFixed(3)})`;
+              c.beginPath();
+              c.moveTo(x - 8, y - 8);
+              c.lineTo(x + 8, y + 8);
+              c.moveTo(x + 8, y - 8);
+              c.lineTo(x - 8, y + 8);
+              c.stroke();
+            }
+          }
+          const jx = 15 + step * at;
+          c.fillStyle = `rgba(255,190,196,.7)`;
+          c.fillRect(jx - 2, y - 2, 4, 4);
+        } else if (kind === 'seal') {
+          /* A small stamp: fine graduations, one ring turning. */
+          const cxx = s / 2;
+          const cyy = s / 2;
+          const r = s * 0.36;
+          for (const [rr, a] of [
+            [r, 0.26],
+            [r * 0.74, 0.16],
+          ] as [number, number][]) {
+            c.strokeStyle = `rgba(${RED},${a})`;
+            c.beginPath();
+            c.arc(cxx, cyy, rr, 0, 6.2832);
+            c.stroke();
+          }
+          const turn = anim ? f * 0.004 : 0;
+          for (let i = 0; i < 60; i++) {
+            const a = turn + (i / 60) * 6.2832;
+            const len = i % 5 === 0 ? 7 : 3;
+            c.strokeStyle = `rgba(${RED},${i % 5 === 0 ? 0.34 : 0.16})`;
+            c.beginPath();
+            c.moveTo(cxx + Math.cos(a) * r, cyy + Math.sin(a) * r);
+            c.lineTo(cxx + Math.cos(a) * (r - len), cyy + Math.sin(a) * (r - len));
+            c.stroke();
+          }
+          c.strokeStyle = `${LINE}.3)`;
+          c.beginPath();
+          c.moveTo(cxx - 7, cyy);
+          c.lineTo(cxx - 2, cyy + 5);
+          c.lineTo(cxx + 8, cyy - 6);
+          c.stroke();
+        } else if (kind === 'globe') {
+          /* A small wireframe globe, turning. */
+          const cxx = s / 2;
+          const cyy = s / 2;
+          const r = s * 0.36;
+          const rot = anim ? f * 0.006 : 0.6;
+          c.strokeStyle = `rgba(${RED},.28)`;
+          c.beginPath();
+          c.arc(cxx, cyy, r, 0, 6.2832);
+          c.stroke();
+          c.strokeStyle = `rgba(${RED},.14)`;
+          for (let i = 0; i < 6; i++) {
+            const w = Math.abs(Math.cos(rot + (i / 6) * Math.PI));
+            c.beginPath();
+            c.ellipse(cxx, cyy, r * w, r, 0, 0, 6.2832);
+            c.stroke();
+          }
+          for (const lat of [-0.6, -0.3, 0, 0.3, 0.6]) {
+            c.beginPath();
+            c.ellipse(cxx, cyy - lat * r, r * Math.sqrt(1 - lat * lat), r * 0.12, 0, 0, 6.2832);
+            c.stroke();
+          }
+          for (const [lat, lon] of [
+            [0.36, 0.9],
+            [0.32, 2.6],
+            [0.42, 4.4],
+          ] as [number, number][]) {
+            const a = lon + rot;
+            const z = Math.cos(a);
+            if (z < 0) continue;
+            const px = cxx + Math.sin(a) * r * Math.sqrt(1 - lat * lat);
+            const py = cyy - lat * r;
+            c.fillStyle = `rgba(255,150,160,${(0.3 + z * 0.5).toFixed(3)})`;
+            c.fillRect(px - 1.5, py - 1.5, 3, 3);
+          }
+        } else {
+          /* handshake: a pulse crossing, sealing on arrival. */
+          const y = s * 0.5;
+          const x0 = 16;
+          const x1 = s - 16;
+          c.strokeStyle = `${LINE}.2)`;
+          c.beginPath();
+          c.moveTo(x0, y);
+          c.lineTo(x1, y);
+          c.stroke();
+          for (const x of [x0, x1]) {
+            c.strokeStyle = `rgba(${RED},.4)`;
+            c.strokeRect(x - 4.5, y - 4.5, 9, 9);
+          }
+          const u = anim ? (f % 300) / 300 : 0.5;
+          const back = u > 0.5;
+          const t2 = back ? 1 - (u - 0.5) * 2 : u * 2;
+          const px = x0 + (x1 - x0) * t2;
+          c.fillStyle = `rgba(255,190,196,.75)`;
+          c.fillRect(px - 2, y - 2, 4, 4);
+          const seal = Math.max(0, 1 - Math.abs(t2 - 0.5) * 6);
+          if (seal > 0) {
+            c.save();
+            c.translate(s / 2, y - 18);
+            c.rotate(seal * 0.7854);
+            c.strokeStyle = `rgba(${RED},${(seal * 0.5).toFixed(3)})`;
+            const q = 4 + seal * 4;
+            c.strokeRect(-q, -q, q * 2, q * 2);
+            c.restore();
+          }
+        }
+
+        c.restore();
+      };
+    },
+    { additive: false }
+  );
+</script>

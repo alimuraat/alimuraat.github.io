@@ -113,47 +113,36 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 
 ## Backdrops
 
-`Backdrop.astro` paints the fixed layers — glow top and bottom, canvas, scrim,
-46px grid, CRT scanline — and picks one scene per page. Each scene is its own
-component under `src/components/backdrops/`, so a page bundles only the one it
-uses on top of the shared harness in `src/scripts/stage.ts`.
+The backdrop is instrumentation, not a picture. Nothing fills the viewport:
+there is a measuring frame around the edges — rulers along the top and left,
+corner brackets, sparse registration marks, and a dimension line that appears
+every so often to measure something and then goes away — and one small
+instrument in the lower right, different on every page.
 
-Every scene is a piece of generative mathematics rather than a motion, and no
-two use the same one:
+| Page | Instrument |
+| --- | --- |
+| `/` | `scan` — a sweep passing over a block of hosts, a few of them open |
+| `/experience` | `track` — five notches, newest at the right, the marker parked on it |
+| `/research` | `severity` — a dial settling on a score |
+| `/projects` | `pipeline` — five gates with one job walking through them, one of them failing |
+| `/certifications` | `seal` — a stamp with fine graduations, one ring turning |
+| `/travel` | `globe` — a small wireframe globe, turning |
+| `/contact` | `handshake` — a pulse crossing and back, sealing a block at the middle |
 
-| Page | Scene | The maths |
-| --- | --- | --- |
-| `/` | `attractor` | A de Jong attractor — `x' = sin(a·y) − cos(b·x)`, `y' = sin(c·x) − cos(d·y)` — iterated thousands of times a frame, adding a hair of light at every landing. The pointer moves two of the four constants, so the whole filigree reorganises under the cursor instead of anything following it |
-| `/experience` | `harmonograph` | Two damped pendulums per axis, frequencies picked close to whole-number ratios so the trace closes into a rosette, drawing itself tighter until it settles and a new set of constants starts the next figure |
-| `/research` | `diffusion` | Gray-Scott reaction-diffusion on an offscreen lattice. Nothing scripts the shapes; the coral falls out of two equations. Uses the weighted nine-point Laplacian — with `dt = 1` and `Du = 1` a five-point one is past its stability limit and runs away to NaN |
-| `/projects` | `truchet` | Recursive Truchet tiling: the plane subdivides into quarters, every leaf carries the same two arcs, and because arcs always meet at edge midpoints the local choices join into one continuous labyrinth that rewires itself without ever breaking |
-| `/certifications` | `guilloche` | The engine-turned rosette engraved on banknotes and certificates, for the same reason it is here — easy to verify, hard to reproduce. Nested hypotrochoids counter-rotating at slightly different rates |
-| `/travel` | `geodesic` | An icosahedron subdivided twice onto the unit sphere: 320 near-equal faces, every edge drawn front and back, with real great circles slerped between the visited coordinates |
-| `/contact` | `chladni` | The nodal figure of a driven plate, `f = sin(nπx)sin(mπy) − sin(mπx)sin(nπy)`, drawn from the field and dusted with particles whose step is scaled by how hard the plate shakes under them. Mode numbers stay whole — between two whole numbers the nodal lines do not close |
+It all lives in one component, `src/components/backdrops/Console.astro`, which
+reads the variant off the canvas and draws the frame plus the right instrument.
+Plain compositing, no additive light and no trails: it should read as a drawing
+rather than as an effect, and total ink on the canvas is a fraction of a
+percent of the viewport.
 
-Two things in the harness do the rendering work:
+`src/scripts/stage.ts` still owns device pixel ratio, the debounced resize,
+pausing while the tab is hidden, pointer state, and reduced motion — where the
+instruments draw one composed frame and never move.
 
-- **additive** — strokes add light instead of covering what is under them, so
-  overlaps bloom into a bright core rather than flattening
-- **trail** — instead of clearing, the frame is faded toward transparent with a
-  `destination-out` fill, which leaves motion trails while keeping the canvas
-  transparent over the layers behind it
+`.bg-scrim` keeps the column the text lives in slightly darker than the edges.
 
-With a trail fade of `f`, anything drawn in the same place every frame settles
-at roughly `1/f` times its per-frame alpha. That ratio is the tuning dial for
-the accumulating scenes — the attractor and the Chladni sand are set by it, not
-by eye.
-
-`.bg-scrim` keeps the column the text lives in a stop or two darker than the
-edges, which is what lets the scenes run bright without costing the copy any
-contrast.
-
-Under `prefers-reduced-motion: reduce` every scene draws one composed frame and
-never moves.
-
-To add a scene: drop a component next to the others that calls `stage()`,
-register it in `Backdrop.astro`, and add its name to the `BackdropVariant`
-union in `Base.astro`.
+To change an instrument, edit its branch in `Console.astro`; to move one to a
+different page, change the `backdrop` prop on that view.
 
 ## The experience roadmap
 

@@ -2,43 +2,31 @@
 /**
  * The fixed background layers, in paint order:
  *   1. .bg-glow / .bg-glow-low  — red light bleeding in at the top and bottom
- *   2. #net                     — the canvas, one scene per page
- *   3. .bg-scrim                — soft darkening down the content column, so
- *                                 the scenes can run bright without costing
- *                                 the text any contrast
+ *   2. #net                     — the canvas: the measuring frame and one small
+ *                                 instrument, per page
+ *   3. .bg-scrim                — soft darkening down the content column
  *   4. .bg-grid                 — 46px grid across the whole viewport
  *   5. .bg-scan                 — 3px CRT scanline
  *
- * Every scene draws additively — strokes add light instead of covering what is
- * under them — and several fade rather than clear, which leaves motion trails.
- * Each is its own component so a page bundles only the one it uses; they share
- * the harness in src/scripts/stage.ts.
+ * The backdrop is instrumentation, not a picture: nothing fills the viewport.
+ * There is a measuring frame around the edges and one small instrument in the
+ * lower right, and which instrument depends on the page.
  *
- *   attractor    — a de Jong attractor steered by the pointer  (/)
- *   harmonograph — damped pendulums tracing one rosette        (/experience)
- *   diffusion    — Gray-Scott reaction-diffusion               (/research)
- *   truchet      — recursive Truchet tiling rewiring itself    (/projects)
- *   guilloche    — engine-turned rosettes, as on a certificate (/certifications)
- *   geodesic     — subdivided sphere with great circles        (/travel)
- *   chladni      — particles settling on nodal lines           (/contact)
+ *   scan       — a sweep over a block of hosts        (/)
+ *   track      — five notches, newest at the right    (/experience)
+ *   severity   — a dial settling on a score           (/research)
+ *   pipeline   — five gates, one job walking them     (/projects)
+ *   seal       — a stamp with fine graduations        (/certifications)
+ *   globe      — a small wireframe globe, turning     (/travel)
+ *   handshake  — a pulse crossing, sealing on arrival (/contact)
  */
-
-import Attractor from './backdrops/Attractor.astro';
-import Corridor from './backdrops/Corridor.astro';
-import Chords from './backdrops/Chords.astro';
-import Hyperbolic from './backdrops/Hyperbolic.astro';
-import Harmonograph from './backdrops/Harmonograph.astro';
-import Diffusion from './backdrops/Diffusion.astro';
-import Truchet from './backdrops/Truchet.astro';
-import Guilloche from './backdrops/Guilloche.astro';
-import Geodesic from './backdrops/Geodesic.astro';
-import Chladni from './backdrops/Chladni.astro';
+import Console from './backdrops/Console.astro';
 
 interface Props {
-  variant?: 'corridor' | 'chords' | 'hyperbolic' | 'attractor' | 'harmonograph' | 'diffusion' | 'truchet' | 'guilloche' | 'geodesic' | 'chladni';
+  variant?: 'scan' | 'track' | 'severity' | 'pipeline' | 'seal' | 'globe' | 'handshake';
 }
 
-const { variant = 'attractor' } = Astro.props;
+const { variant = 'scan' } = Astro.props;
 ---
 
 <div class="bg-glow" aria-hidden="true"></div>
@@ -48,14 +36,4 @@ const { variant = 'attractor' } = Astro.props;
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-scan" aria-hidden="true"></div>
 
-{variant === 'corridor' && <Corridor />}
-{variant === 'chords' && <Chords />}
-{variant === 'hyperbolic' && <Hyperbolic />}
-{variant === 'attractor' && <Attractor />}
-{variant === 'harmonograph' && <Harmonograph />}
-{variant === 'diffusion' && <Diffusion />}
-{variant === 'truchet' && <Truchet />}
-{variant === 'guilloche' && <Guilloche />}
-{variant === 'geodesic' && <Geodesic />}
-{variant === 'chladni' && <Chladni />}
-
+<Console />
