@@ -3,51 +3,51 @@
  * The fixed background layers, in paint order:
  *   1. .bg-glow / .bg-glow-low  — red light bleeding in at the top and bottom
  *   2. #net                     — the canvas, one scene per page
- *   3. .bg-grid                 — 46px grid across the whole viewport
- *   4. .bg-scan                 — 3px CRT scanline
+ *   3. .bg-scrim                — soft darkening down the content column, so
+ *                                 the scenes can run bright without costing
+ *                                 the text any contrast
+ *   4. .bg-grid                 — 46px grid across the whole viewport
+ *   5. .bg-scan                 — 3px CRT scanline
  *
- * Every layer is pointer-events:none and sits below the z-index:2 content, and
- * because the canvas is position:fixed the scene covers the viewport at any
- * scroll position.
+ * Every scene draws additively — strokes add light instead of covering what is
+ * under them — and several fade rather than clear, which leaves motion trails.
+ * Each is its own component so a page bundles only the one it uses; they share
+ * the harness in src/scripts/stage.ts.
  *
- * Each page gets a different *medium*, not the same motion rearranged: a scan
- * field, a log, a hex dump, a tree, a matrix, a wireframe globe, a waveform.
- * Scenes are separate components so a page bundles only the one it uses; they
- * share the harness in src/scripts/stage.ts.
- *
- *   recon    — address space under a rotating scan     (/)
- *   authlog  — access log entries granting and denying (/experience)
- *   fracture   — a crack propagating and branching        (/research)
- *   build      — isometric modules rising and settling    (/projects)
- *   mechanism  — notched rings converging on a mark       (/certifications)
- *   globe    — wireframe globe turning                 (/travel)
- *   entropy  — signal bands converting to ciphertext   (/contact)
+ *   flux         — a flow field that opens around the pointer  (/)
+ *   rails        — light accelerating along parallel rails     (/experience)
+ *   interference — three drifting sources, sampled on a grid   (/research)
+ *   skyline      — isometric blocks under a sweeping light     (/projects)
+ *   crystal      — an icosahedron turning in perspective       (/certifications)
+ *   aurora       — ribbons of light adding up where they cross (/travel)
+ *   beacon       — streaks, incoming messages, answer rings    (/contact)
  */
-import Recon from './backdrops/Recon.astro';
-import Authlog from './backdrops/Authlog.astro';
-import Fracture from './backdrops/Fracture.astro';
-import Build from './backdrops/Build.astro';
-import Mechanism from './backdrops/Mechanism.astro';
-import Globe from './backdrops/Globe.astro';
-import Entropy from './backdrops/Entropy.astro';
+import Flux from './backdrops/Flux.astro';
+import Rails from './backdrops/Rails.astro';
+import Interference from './backdrops/Interference.astro';
+import Skyline from './backdrops/Skyline.astro';
+import Crystal from './backdrops/Crystal.astro';
+import Aurora from './backdrops/Aurora.astro';
+import Beacon from './backdrops/Beacon.astro';
 
 interface Props {
-  variant?: 'recon' | 'authlog' | 'fracture' | 'build' | 'mechanism' | 'globe' | 'entropy';
+  variant?: 'flux' | 'rails' | 'interference' | 'skyline' | 'crystal' | 'aurora' | 'beacon';
 }
 
-const { variant = 'recon' } = Astro.props;
+const { variant = 'flux' } = Astro.props;
 ---
 
 <div class="bg-glow" aria-hidden="true"></div>
 <div class="bg-glow-low" aria-hidden="true"></div>
 <canvas id="net" aria-hidden="true" data-variant={variant}></canvas>
+<div class="bg-scrim" aria-hidden="true"></div>
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-scan" aria-hidden="true"></div>
 
-{variant === 'recon' && <Recon />}
-{variant === 'authlog' && <Authlog />}
-{variant === 'fracture' && <Fracture />}
-{variant === 'build' && <Build />}
-{variant === 'mechanism' && <Mechanism />}
-{variant === 'globe' && <Globe />}
-{variant === 'entropy' && <Entropy />}
+{variant === 'flux' && <Flux />}
+{variant === 'rails' && <Rails />}
+{variant === 'interference' && <Interference />}
+{variant === 'skyline' && <Skyline />}
+{variant === 'crystal' && <Crystal />}
+{variant === 'aurora' && <Aurora />}
+{variant === 'beacon' && <Beacon />}

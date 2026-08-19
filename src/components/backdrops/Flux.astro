@@ -1,0 +1,120 @@
+---
+/**
+ * Home — a flow field you can push around.
+ *
+ * A couple of thousand particles ride a slow curl field and bloom where they
+ * crowd together. Inside the sensor radius they are pushed out and swept into
+ * an orbit, so the field opens around the cursor and closes behind it; a click
+ * sends a shock ring through it. With no pointer the disturbance drifts on its
+ * own, so a phone sees the same thing.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage(
+    (k) => {
+      const { c, W, H, anim, ptr, RED, glow } = k;
+
+      const N = Math.max(360, Math.min(1500, Math.round((W * H) / 1500)));
+      const REACH = 210;
+      const spark = glow(14, RED, 0.5);
+      const core = glow(5, '255,210,214', 0.85);
+      const hot = glow(26, '255,90,105', 0.35);
+
+      /* x, y, vx, vy packed flat — this many objects would thrash the GC. */
+      const P = new Float32Array(N * 4);
+      for (let i = 0; i < N; i++) {
+        P[i * 4] = Math.random() * W;
+        P[i * 4 + 1] = Math.random() * H;
+      }
+
+      let fx = W * 0.5;
+      let fy = H * 0.45;
+      let t = 0;
+      let shock = 0;
+      let sx = 0;
+      let sy = 0;
+
+      return () => {
+        t += 0.0022;
+        if (anim) ptr.idle++;
+
+        const auto = !ptr.seen || ptr.idle > 220;
+        const tx = auto ? W * 0.5 + Math.cos(t * 1.7) * W * 0.32 : ptr.x;
+        const ty = auto ? H * 0.5 + Math.sin(t * 2.3) * H * 0.3 : ptr.y;
+        fx += (tx - fx) * (anim ? 0.05 : 1);
+        fy += (ty - fy) * (anim ? 0.05 : 1);
+
+        if (ptr.hit) {
+          sx = ptr.hit.x;
+          sy = ptr.hit.y;
+          shock = 1;
+          ptr.hit = null;
+        }
+        if (shock > 0 && anim) shock -= 0.02;
+
+        for (let i = 0; i < N; i++) {
+          const o = i * 4;
+          let x = P[o];
+          let y = P[o + 1];
+
+          if (anim) {
+            /* Two out-of-phase waves make the drifting swirls. */
+            const a = Math.sin(y * 0.0052 + t * 2.2) * 1.7 + Math.cos(x * 0.0047 - t * 1.6) * 1.7;
+            let vx = P[o + 2] * 0.86 + Math.cos(a) * 0.42;
+            let vy = P[o + 3] * 0.86 + Math.sin(a) * 0.42;
+
+            const dx = x - fx;
+            const dy = y - fy;
+            const d = Math.hypot(dx, dy) || 1;
+            if (d < REACH) {
+              const f = (1 - d / REACH) ** 2;
+              vx += (dx / d) * f * 2.6 - (dy / d) * f * 3.4;
+              vy += (dy / d) * f * 2.6 + (dx / d) * f * 3.4;
+            }
+
+            if (shock > 0) {
+              const ex = x - sx;
+              const ey = y - sy;
+              const ed = Math.hypot(ex, ey) || 1;
+              if (Math.abs(ed - (1 - shock) * 520) < 70) {
+                vx += (ex / ed) * shock * 5;
+                vy += (ey / ed) * shock * 5;
+              }
+            }
+
+            x += vx;
+            y += vy;
+            if (x < -20) x = W + 20;
+            else if (x > W + 20) x = -20;
+            if (y < -20) y = H + 20;
+            else if (y > H + 20) y = -20;
+
+            P[o] = x;
+            P[o + 1] = y;
+            P[o + 2] = vx;
+            P[o + 3] = vy;
+          }
+
+          const sp = Math.hypot(P[o + 2], P[o + 3]);
+          const r = 1.4 + sp * 1.5;
+          c.globalAlpha = Math.min(1, 0.16 + sp * 0.28);
+          c.drawImage(spark, x - r * 2, y - r * 2, r * 4, r * 4);
+          if (sp > 1.9) {
+            c.globalAlpha = Math.min(1, (sp - 1.9) * 0.6);
+            c.drawImage(core, x - 3, y - 3, 6, 6);
+          }
+        }
+
+        c.globalAlpha = 0.32;
+        c.drawImage(hot, fx - 52, fy - 52, 104, 104);
+        c.globalAlpha = 0.4;
+        c.drawImage(core, fx - 5, fy - 5, 10, 10);
+        c.globalAlpha = 1;
+      };
+    },
+    { trail: 0.1, additive: true }
+  );
+</script>

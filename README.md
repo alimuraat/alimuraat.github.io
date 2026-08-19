@@ -113,29 +113,39 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 
 ## Backdrops
 
-`Backdrop.astro` paints the fixed layers — top and bottom glow, canvas, 46px
-grid, CRT scanline — and picks one scene per page. Each scene is its own
+`Backdrop.astro` paints the fixed layers — glow top and bottom, canvas, scrim,
+46px grid, CRT scanline — and picks one scene per page. Each scene is its own
 component under `src/components/backdrops/`, so a page bundles only the one it
-uses (~1 KB gzip each) on top of the shared harness in `src/scripts/stage.ts`.
+uses (well under 1 KB gzip each) on top of the shared harness in
+`src/scripts/stage.ts`.
 
-The point is that every page gets a different **medium**, not the same motion
-rearranged — a scan field, a log, fracture lines, an isometric wireframe, a
-mechanism, a globe, a waveform:
+Two things in the harness do the heavy lifting:
+
+- **additive** — strokes add light instead of covering what is under them, so
+  overlaps bloom into a bright core rather than flattening
+- **trail** — instead of clearing, the frame is faded toward transparent with a
+  `destination-out` fill, which leaves motion trails while keeping the canvas
+  transparent over the layers behind it
 
 | Page | Scene | What it is |
 | --- | --- | --- |
-| `/` | `recon` | An address lattice under a rotating scan. The pointer carries the scanner; whatever the spoke crosses comes back closed, open with a service, or flagged. Nothing follows the cursor and nothing deforms around it. With no pointer the scan walks the viewport itself |
-| `/experience` | `authlog` | Access log entries appearing in fixed slots and fading — grants, role changes, the occasional denial. Nothing scrolls |
-| `/research` | `fracture` | A stress point opens and a hairline crack walks out of it, branching until it runs out of viewport or energy, then anneals away and the next one starts |
-| `/projects` | `build` | An isometric wireframe landscape of modules that rise, hold and come down again, drawn back to front |
-| `/certifications` | `mechanism` | Notched rings turning at their own rates, then converging their key notches on one mark, holding, and releasing |
-| `/travel` | `globe` | A wireframe globe in orthographic projection, turning for real, with the visited coordinates as markers that fade round the back |
-| `/contact` | `entropy` | Signal bands converting to ciphertext: dense noise behind an advancing boundary, the readable wave ahead of it |
+| `/` | `flux` | A few thousand particles on a curl field. Inside the sensor radius they are pushed out and swept into an orbit, so the field opens around the cursor and closes behind it; a click sends a shock ring through it |
+| `/experience` | `rails` | Packets accelerating down parallel rails, trails behind them, blooming when they reach a station |
+| `/research` | `interference` | Three drifting sources sampled on a lattice — bright where their waves agree, dark where they cancel |
+| `/projects` | `skyline` | Isometric blocks under a band of light sweeping diagonally; roofs light and taller blocks throw a beam as it passes |
+| `/certifications` | `crystal` | An icosahedron — twelve vertices, edges found by distance — turning on two axes in perspective, with a smaller one counter-rotating inside |
+| `/travel` | `aurora` | Ribbons of light drifting across each other; the colour comes from where they overlap, nothing is painted bright on its own |
+| `/contact` | `beacon` | Streaks turning around a core, messages falling in from the edges and being absorbed, an answer ring every few seconds |
 
-The harness owns device pixel ratio (capped at 2), a 180 ms debounced resize,
-pausing the rAF loop while the tab is hidden, pointer tracking, and reduced
-motion — where every scene draws one composed frame and never moves. Structural
-strokes stay low-alpha; only labels and the scan head go brighter.
+`.bg-scrim` keeps the column the text lives in a stop or two darker than the
+edges, which is what lets the scenes run bright without costing the copy any
+contrast. Two dials tune the whole thing: the `trail` value per scene (lower is
+longer trails) and `globalAlpha` on the draws. With a trail fade of `f`,
+anything drawn in the same place every frame settles at roughly `1/f` times its
+per-frame alpha — that is why the steady-state elements are set low.
+
+Under `prefers-reduced-motion: reduce` every scene draws one composed frame and
+never moves.
 
 To add a scene: drop a component next to the others that calls `stage()`,
 register it in `Backdrop.astro`, and add its name to the `BackdropVariant`

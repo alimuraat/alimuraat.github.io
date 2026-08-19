@@ -1,0 +1,103 @@
+---
+/**
+ * Certifications — a faceted solid turning in space.
+ *
+ * A real icosahedron: twelve vertices, edges found by distance, rotated on two
+ * axes and projected with perspective. Edges nearer the viewer burn brighter,
+ * a smaller one counter-rotates inside it, and a facet catches the light every
+ * few seconds. A seal, not a chart.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage(
+    (k) => {
+      const { c, W, H, anim, rand, RED, glow } = k;
+
+      const PHI = 1.618034;
+      const V: [number, number, number][] = [];
+      for (const s1 of [-1, 1]) {
+        for (const s2 of [-PHI, PHI]) {
+          V.push([0, s1, s2], [s1, s2, 0], [s2, 0, s1]);
+        }
+      }
+      /* Edge length of this construction is 2; anything longer is a diagonal. */
+      const E: [number, number][] = [];
+      for (let i = 0; i < V.length; i++) {
+        for (let j = i + 1; j < V.length; j++) {
+          const d = Math.hypot(V[i][0] - V[j][0], V[i][1] - V[j][1], V[i][2] - V[j][2]);
+          if (d < 2.05) E.push([i, j]);
+        }
+      }
+
+      const cx = W > 900 ? W * 0.71 : W * 0.5;
+      const cy = H * 0.5;
+      const R = Math.min(W * 0.3, H * 0.34);
+      const node = glow(13, '255,120,132', 0.7);
+      const flare = glow(80, RED, 0.28);
+
+      let ax = 0.5;
+      let ay = 0.2;
+      let facet = -1;
+      let ft = 0;
+      let f = 0;
+
+      const spin = (v: [number, number, number], sx: number, sy: number, scale: number) => {
+        const [x0, y0, z0] = v;
+        const x1 = x0 * Math.cos(sy) + z0 * Math.sin(sy);
+        const z1 = -x0 * Math.sin(sy) + z0 * Math.cos(sy);
+        const y1 = y0 * Math.cos(sx) - z1 * Math.sin(sx);
+        const z2 = y0 * Math.sin(sx) + z1 * Math.cos(sx);
+        const p = 3.4 / (3.4 + z2 * 0.55);
+        return { x: cx + x1 * scale * p, y: cy + y1 * scale * p, z: z2, p };
+      };
+
+      return () => {
+        f++;
+        if (anim) {
+          ax += 0.0031;
+          ay += 0.0047;
+          if (facet < 0 && Math.random() < 0.006) {
+            facet = (Math.random() * E.length) | 0;
+            ft = f;
+          }
+          if (facet >= 0 && f - ft > 120) facet = -1;
+        }
+
+        c.globalAlpha = 1;
+        c.drawImage(flare, cx - R * 1.25, cy - R * 1.25, R * 2.5, R * 2.5);
+
+        /* Inner solid, counter-rotating and smaller. */
+        for (const scale of [R * 0.42, R * 0.96]) {
+          const inner = scale < R * 0.6;
+          const px = V.map((v) => spin(v, inner ? -ax * 1.6 : ax, inner ? -ay * 1.3 : ay, scale / 1.9));
+          c.lineWidth = 1;
+          for (let i = 0; i < E.length; i++) {
+            const a = px[E[i][0]];
+            const b = px[E[i][1]];
+            const depth = (a.z + b.z) / 2;
+            const near = (depth + PHI) / (PHI * 2);
+            const lit = facet === i ? 1 : 0;
+            c.strokeStyle = `rgba(${RED},${((inner ? 0.1 : 0.16) + near * 0.3 + lit * 0.5).toFixed(3)})`;
+            c.beginPath();
+            c.moveTo(a.x, a.y);
+            c.lineTo(b.x, b.y);
+            c.stroke();
+          }
+          if (!inner) {
+            for (const p of px) {
+              const near = (p.z + PHI) / (PHI * 2);
+              const r = 4 + near * 8;
+              c.globalAlpha = 0.25 + near * 0.6;
+              c.drawImage(node, p.x - r, p.y - r, r * 2, r * 2);
+            }
+            c.globalAlpha = 1;
+          }
+        }
+      };
+    },
+    { additive: true }
+  );
+</script>
