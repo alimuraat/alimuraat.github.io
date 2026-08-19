@@ -113,37 +113,38 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 
 ## Backdrops
 
-One visual language across the whole site, and a different behaviour per page.
+Drawn from the tools of the trade rather than from the film version of them:
+no falling glyphs, no green terminal, no padlocks.
 
-The language is the one the site started with, and the one this kind of site
-tends to get right: a sparse constellation of nodes, hairline links between the
-near ones, and small lights travelling along them. The field is weighted toward
-the middle of the viewport — `u^0.62` on the radius, which crowds the centre
-without leaving a hole in it — so the movement reads as one thing in the middle
-rather than as noise spread into the corners.
-
-What differs per page is what the constellation *does*:
-
-| Page | Behaviour |
+| Page | What it is |
 | --- | --- |
-| `/` | `mesh` — drifts, packets crossing random links |
-| `/experience` | `chain` — a walker takes a path through it node by node, leaving the stretch it has walked lit |
-| `/research` | `flare` — one node ignites and it spreads along the links, then heals |
-| `/projects` | `cluster` — nodes gather into modules, then regroup somewhere else |
-| `/certifications` | `align` — nodes settle onto concentric rings, hold, and release |
-| `/travel` | `routes` — long arcs open between distant nodes, then fade |
-| `/contact` | `relay` — two groups either side of the centre, passing packets across the gap |
+| `/` | `binvis` — an address space laid along a Hilbert curve and coloured by entropy, which is how people who take binaries apart actually look at one. **The pointer is a read head**: whatever region it is over lights up and reports its offset and entropy, and a click sends a scan running along the curve. With no pointer the head walks by itself |
+| `/experience` | `flame` — a flame graph, the way you read where the time actually went |
+| `/research` | `fuzz` — a coverage bitmap filling in, path count climbing, the odd crash marked |
+| `/projects` | `treemap` — what a codebase is made of, re-partitioning on a cycle |
+| `/certifications` | `avalanche` — flip one input bit and watch the digest come apart |
+| `/travel` | `azimuth` — azimuthal-equidistant plot, real great-circle ranges measured from Istanbul, with a sweep |
+| `/contact` | `randomart` — the drunken bishop walked out, exactly as `ssh-keygen` draws a fingerprint |
 
-It is one component, `src/components/backdrops/Field.astro`, which reads the
-variant off the canvas. Plain compositing — no additive light, no trails — at
-one node per ~16k px², which is the density the first version had.
+`Binvis.astro` carries the home page; the other six live in `Panel.astro`,
+which reads the variant off the canvas. Both are plain compositing — no
+additive light, no trails.
 
-Density is the setting that matters: crowding the field toward the middle
-without raising the node count is what makes it look empty, and `.bg-scrim` has
-to stay light or it washes out the middle it is sitting on top of.
+Composition rules that took a while to arrive at:
+
+- The visualisation is **centred behind the column**, not beside it. With
+  1180px of content there is no room for a side panel on an ordinary screen.
+- **No frame, no caption box.** A bordered widget in a corner reads as a
+  widget.
+- Contrast stays low enough that the copy always wins; only the read head on
+  the home page goes bright, and it goes bright because it is the interaction.
+
+The home scene is the heaviest and measures ~5.7 ms on its worst frame, with
+the 4095 curve segments bucketed into four paths by entropy and the bucket
+membership worked out once rather than per frame.
 
 `src/scripts/stage.ts` owns device pixel ratio, the debounced resize, pausing
-while the tab is hidden, pointer state, and reduced motion — where the field
+while the tab is hidden, pointer state, and reduced motion — where every scene
 draws one composed frame and never moves.
 
 ## The experience roadmap

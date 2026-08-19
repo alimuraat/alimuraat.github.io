@@ -2,22 +2,32 @@
 /**
  * The fixed background layers, in paint order:
  *   1. .bg-glow / .bg-glow-low  — red light bleeding in at the top and bottom
- *   2. #net                     — the constellation, one behaviour per page
+ *   2. #net                     — the canvas, one visualisation per page
  *   3. .bg-scrim                — soft darkening down the content column
  *   4. .bg-grid                 — 46px grid across the whole viewport
  *   5. .bg-scan                 — 3px CRT scanline
  *
- * One visual language across the site — a sparse constellation with hairline
- * links and small lights travelling them, weighted toward the middle of the
- * viewport — and a different behaviour per page. See Field.astro.
+ * The backdrops are drawn from the tools of the trade rather than from the film
+ * version of them — no falling glyphs, no green terminal, no padlocks. On a
+ * wide screen they sit to the right of the column the copy lives in, so nothing
+ * is ever read through a moving picture.
+ *
+ *   binvis     — an address space on a Hilbert curve, read by the pointer  (/)
+ *   flame      — a flame graph                                (/experience)
+ *   fuzz       — a coverage bitmap filling in, with crashes   (/research)
+ *   treemap    — what a codebase is made of                   (/projects)
+ *   avalanche  — one input bit flipped, the digest comes apart (/certifications)
+ *   azimuth    — ranges measured from Istanbul                (/travel)
+ *   randomart  — the drunken bishop, as on a key fingerprint  (/contact)
  */
-import Field from './backdrops/Field.astro';
+import Binvis from './backdrops/Binvis.astro';
+import Panel from './backdrops/Panel.astro';
 
 interface Props {
-  variant?: 'mesh' | 'chain' | 'flare' | 'cluster' | 'align' | 'routes' | 'relay';
+  variant?: 'binvis' | 'flame' | 'fuzz' | 'treemap' | 'avalanche' | 'azimuth' | 'randomart';
 }
 
-const { variant = 'mesh' } = Astro.props;
+const { variant = 'binvis' } = Astro.props;
 ---
 
 <div class="bg-glow" aria-hidden="true"></div>
@@ -27,4 +37,5 @@ const { variant = 'mesh' } = Astro.props;
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-scan" aria-hidden="true"></div>
 
-<Field />
+{variant === 'binvis' && <Binvis />}
+{variant !== 'binvis' && <Panel />}
