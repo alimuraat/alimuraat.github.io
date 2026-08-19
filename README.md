@@ -113,36 +113,38 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 
 ## Backdrops
 
-The backdrop is instrumentation, not a picture. Nothing fills the viewport:
-there is a measuring frame around the edges — rulers along the top and left,
-corner brackets, sparse registration marks, and a dimension line that appears
-every so often to measure something and then goes away — and one small
-instrument in the lower right, different on every page.
+One visual language across the whole site, and a different behaviour per page.
 
-| Page | Instrument |
+The language is the one the site started with, and the one this kind of site
+tends to get right: a sparse constellation of nodes, hairline links between the
+near ones, and small lights travelling along them. The field is weighted toward
+the middle of the viewport — `u^0.62` on the radius, which crowds the centre
+without leaving a hole in it — so the movement reads as one thing in the middle
+rather than as noise spread into the corners.
+
+What differs per page is what the constellation *does*:
+
+| Page | Behaviour |
 | --- | --- |
-| `/` | `scan` — a sweep passing over a block of hosts, a few of them open |
-| `/experience` | `track` — five notches, newest at the right, the marker parked on it |
-| `/research` | `severity` — a dial settling on a score |
-| `/projects` | `pipeline` — five gates with one job walking through them, one of them failing |
-| `/certifications` | `seal` — a stamp with fine graduations, one ring turning |
-| `/travel` | `globe` — a small wireframe globe, turning |
-| `/contact` | `handshake` — a pulse crossing and back, sealing a block at the middle |
+| `/` | `mesh` — drifts, packets crossing random links |
+| `/experience` | `chain` — a walker takes a path through it node by node, leaving the stretch it has walked lit |
+| `/research` | `flare` — one node ignites and it spreads along the links, then heals |
+| `/projects` | `cluster` — nodes gather into modules, then regroup somewhere else |
+| `/certifications` | `align` — nodes settle onto concentric rings, hold, and release |
+| `/travel` | `routes` — long arcs open between distant nodes, then fade |
+| `/contact` | `relay` — two groups either side of the centre, passing packets across the gap |
 
-It all lives in one component, `src/components/backdrops/Console.astro`, which
-reads the variant off the canvas and draws the frame plus the right instrument.
-Plain compositing, no additive light and no trails: it should read as a drawing
-rather than as an effect, and total ink on the canvas is a fraction of a
-percent of the viewport.
+It is one component, `src/components/backdrops/Field.astro`, which reads the
+variant off the canvas. Plain compositing — no additive light, no trails — at
+one node per ~16k px², which is the density the first version had.
 
-`src/scripts/stage.ts` still owns device pixel ratio, the debounced resize,
-pausing while the tab is hidden, pointer state, and reduced motion — where the
-instruments draw one composed frame and never move.
+Density is the setting that matters: crowding the field toward the middle
+without raising the node count is what makes it look empty, and `.bg-scrim` has
+to stay light or it washes out the middle it is sitting on top of.
 
-`.bg-scrim` keeps the column the text lives in slightly darker than the edges.
-
-To change an instrument, edit its branch in `Console.astro`; to move one to a
-different page, change the `backdrop` prop on that view.
+`src/scripts/stage.ts` owns device pixel ratio, the debounced resize, pausing
+while the tab is hidden, pointer state, and reduced motion — where the field
+draws one composed frame and never moves.
 
 ## The experience roadmap
 

@@ -124,12 +124,14 @@ img { max-width: 100%; }
   width: min(1340px, 100vw);
   z-index: 0;
   pointer-events: none;
+  /* Light touch: the field is hairlines now, so the column only needs a hint
+     of separation rather than the heavy scrim the bright scenes wanted. */
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(7, 7, 8, .5) 14%,
-    rgba(7, 7, 8, .62) 50%,
-    rgba(7, 7, 8, .5) 86%,
+    rgba(7, 7, 8, .22) 16%,
+    rgba(7, 7, 8, .3) 50%,
+    rgba(7, 7, 8, .22) 84%,
     transparent 100%
   );
 }
