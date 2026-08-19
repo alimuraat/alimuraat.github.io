@@ -1,0 +1,159 @@
+---
+/**
+ * Home — address space under a scan.
+ *
+ * Hosts sit still on a lattice, the way addresses do. The pointer carries the
+ * scanner: a spoke rotates around it, and whatever it crosses inside the
+ * sensor radius gets a result — most closed, some open with a service, the
+ * occasional one flagged. Nothing follows the cursor and nothing deforms
+ * around it; the cursor only decides where the scan is looking.
+ */
+---
+
+<script>
+  import { stage, drawClickRings } from '../../scripts/stage';
+
+  const OPEN = ['22/tcp', '443/tcp', '80/tcp', '8080/tcp', '3389/tcp', '5432/tcp', '53/udp'];
+  const FLAG = ['cvss 8.8', 'cvss 9.1', 'outdated tls', 'default creds', 'cve-2026-*'];
+
+  stage((k) => {
+    const { c, W, H, anim, ptr, rand, RED, mono } = k;
+    const REACH = 250;
+    const GAP = 72;
+
+    const cols = Math.ceil(W / GAP) + 1;
+    const rows = Math.ceil(H / GAP) + 1;
+    const hosts: {
+      x: number;
+      y: number;
+      at: number;
+      kind: 0 | 1 | 2;
+      label: string;
+    }[] = [];
+    for (let r = 0; r < rows; r++) {
+      for (let i = 0; i < cols; i++) {
+        hosts.push({
+          x: i * GAP + rand(-9, 9),
+          y: r * GAP + rand(-9, 9),
+          at: -1e9,
+          kind: 0,
+          label: '',
+        });
+      }
+    }
+
+    let fx = W * 0.5;
+    let fy = H * 0.45;
+    let t = 0;
+    let spoke = 0;
+    let f = 0;
+
+    return () => {
+      f++;
+      t += 0.0038;
+      if (anim) {
+        ptr.idle++;
+        spoke += 0.022;
+      }
+
+      const auto = !ptr.seen || ptr.idle > 200;
+      const tx = auto ? W * 0.5 + Math.cos(t) * W * 0.32 : ptr.x;
+      const ty = auto ? H * 0.5 + Math.sin(t * 1.4) * H * 0.34 : ptr.y;
+      const ease = anim ? 0.05 : 1;
+      fx += (tx - fx) * ease;
+      fy += (ty - fy) * ease;
+
+      /* Address blocks: every eighth line of the lattice reads a little
+         stronger, so the field looks like a range rather than confetti. */
+      c.lineWidth = 1;
+      c.strokeStyle = `rgba(${RED},.075)`;
+      for (let i = 0; i < cols; i += 8) {
+        c.beginPath();
+        c.moveTo(i * GAP, 0);
+        c.lineTo(i * GAP, H);
+        c.stroke();
+      }
+      for (let r = 0; r < rows; r += 8) {
+        c.beginPath();
+        c.moveTo(0, r * GAP);
+        c.lineTo(W, r * GAP);
+        c.stroke();
+      }
+
+      /* Sensor rings and the rotating sweep, drawn as a decaying trail. */
+      for (const r of [REACH * 0.45, REACH]) {
+        c.strokeStyle = `rgba(${RED},.09)`;
+        c.beginPath();
+        c.arc(fx, fy, r, 0, 6.2832);
+        c.stroke();
+      }
+      for (let i = 0; i < 26; i++) {
+        const a = spoke - i * 0.05;
+        c.strokeStyle = `rgba(${RED},${((1 - i / 26) * 0.13).toFixed(3)})`;
+        c.beginPath();
+        c.moveTo(fx, fy);
+        c.lineTo(fx + Math.cos(a) * REACH, fy + Math.sin(a) * REACH);
+        c.stroke();
+      }
+
+      c.font = mono(9);
+      c.textBaseline = 'middle';
+
+      for (const h of hosts) {
+        const dx = h.x - fx;
+        const dy = h.y - fy;
+        const d = Math.hypot(dx, dy);
+        const near = d < REACH ? 1 - d / REACH : 0;
+
+        if (anim && near > 0) {
+          let da = Math.atan2(dy, dx) - (spoke % 6.2832);
+          while (da < -3.1416) da += 6.2832;
+          while (da > 3.1416) da -= 6.2832;
+          if (Math.abs(da) < 0.03) {
+            h.at = f;
+            const roll = Math.random();
+            h.kind = roll > 0.93 ? 2 : roll > 0.72 ? 1 : 0;
+            h.label =
+              h.kind === 2
+                ? FLAG[(Math.random() * FLAG.length) | 0]
+                : h.kind === 1
+                  ? OPEN[(Math.random() * OPEN.length) | 0]
+                  : '';
+          }
+        }
+
+        const age = (f - h.at) / 240;
+        const fresh = age < 1 ? 1 - age : 0;
+
+        if (fresh > 0 && h.kind === 2) {
+          const a = fresh * 0.75;
+          c.strokeStyle = `rgba(240,160,32,${a.toFixed(3)})`;
+          c.strokeRect(h.x - 5, h.y - 5, 10, 10);
+          c.fillStyle = `rgba(240,160,32,${(a * 0.85).toFixed(3)})`;
+          c.fillText(h.label, h.x + 10, h.y + 0.5);
+        } else if (fresh > 0 && h.kind === 1) {
+          const a = fresh * 0.6;
+          c.strokeStyle = `rgba(${RED},${a.toFixed(3)})`;
+          for (const s of [-1, 1]) {
+            c.beginPath();
+            c.moveTo(h.x + s * 4, h.y - 5);
+            c.lineTo(h.x + s * 7, h.y - 5);
+            c.lineTo(h.x + s * 7, h.y + 5);
+            c.lineTo(h.x + s * 4, h.y + 5);
+            c.stroke();
+          }
+          c.fillStyle = `rgba(255,140,150,${(a * 0.8).toFixed(3)})`;
+          c.fillText(h.label, h.x + 11, h.y + 0.5);
+        }
+
+        c.fillStyle = `rgba(${RED},${(0.26 + near * 0.32 + fresh * 0.45).toFixed(3)})`;
+        c.fillRect(h.x - 1, h.y - 1, 2, 2);
+      }
+
+      c.fillStyle = `rgba(255,190,195,${auto ? 0.3 : 0.75})`;
+      c.fillRect(fx - 2, fy - 2, 4, 4);
+
+      drawClickRings(k);
+    };
+  });
+</script>

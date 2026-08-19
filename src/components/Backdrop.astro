@@ -2,40 +2,52 @@
 /**
  * The fixed background layers, in paint order:
  *   1. .bg-glow / .bg-glow-low  — red light bleeding in at the top and bottom
- *   2. #net                     — the canvas, one visualisation per page
- *   3. .bg-scrim                — soft darkening down the content column
- *   4. .bg-grid                 — 46px grid across the whole viewport
- *   5. .bg-scan                 — 3px CRT scanline
+ *   2. #net                     — the canvas, one scene per page
+ *   3. .bg-grid                 — 46px grid across the whole viewport
+ *   4. .bg-scan                 — 3px CRT scanline
  *
- * The backdrops are drawn from the tools of the trade rather than from the film
- * version of them — no falling glyphs, no green terminal, no padlocks. On a
- * wide screen they sit to the right of the column the copy lives in, so nothing
- * is ever read through a moving picture.
+ * Every layer is pointer-events:none and sits below the z-index:2 content, and
+ * because the canvas is position:fixed the scene covers the viewport at any
+ * scroll position.
  *
- *   binvis     — an address space on a Hilbert curve, read by the pointer  (/)
- *   flame      — a flame graph                                (/experience)
- *   fuzz       — a coverage bitmap filling in, with crashes   (/research)
- *   treemap    — what a codebase is made of                   (/projects)
- *   avalanche  — one input bit flipped, the digest comes apart (/certifications)
- *   azimuth    — ranges measured from Istanbul                (/travel)
- *   randomart  — the drunken bishop, as on a key fingerprint  (/contact)
+ * Each page gets a different *medium*, not the same motion rearranged: a scan
+ * field, a log, a hex dump, a tree, a matrix, a wireframe globe, a waveform.
+ * Scenes are separate components so a page bundles only the one it uses; they
+ * share the harness in src/scripts/stage.ts.
+ *
+ *   recon    — address space under a rotating scan     (/)
+ *   authlog  — access log entries granting and denying (/experience)
+ *   fracture   — a crack propagating and branching        (/research)
+ *   build      — isometric modules rising and settling    (/projects)
+ *   mechanism  — notched rings converging on a mark       (/certifications)
+ *   globe    — wireframe globe turning                 (/travel)
+ *   entropy  — signal bands converting to ciphertext   (/contact)
  */
-import Binvis from './backdrops/Binvis.astro';
-import Panel from './backdrops/Panel.astro';
+import Recon from './backdrops/Recon.astro';
+import Authlog from './backdrops/Authlog.astro';
+import Fracture from './backdrops/Fracture.astro';
+import Build from './backdrops/Build.astro';
+import Mechanism from './backdrops/Mechanism.astro';
+import Globe from './backdrops/Globe.astro';
+import Entropy from './backdrops/Entropy.astro';
 
 interface Props {
-  variant?: 'binvis' | 'flame' | 'fuzz' | 'treemap' | 'avalanche' | 'azimuth' | 'randomart';
+  variant?: 'recon' | 'authlog' | 'fracture' | 'build' | 'mechanism' | 'globe' | 'entropy';
 }
 
-const { variant = 'binvis' } = Astro.props;
+const { variant = 'recon' } = Astro.props;
 ---
 
 <div class="bg-glow" aria-hidden="true"></div>
 <div class="bg-glow-low" aria-hidden="true"></div>
 <canvas id="net" aria-hidden="true" data-variant={variant}></canvas>
-<div class="bg-scrim" aria-hidden="true"></div>
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-scan" aria-hidden="true"></div>
 
-{variant === 'binvis' && <Binvis />}
-{variant !== 'binvis' && <Panel />}
+{variant === 'recon' && <Recon />}
+{variant === 'authlog' && <Authlog />}
+{variant === 'fracture' && <Fracture />}
+{variant === 'build' && <Build />}
+{variant === 'mechanism' && <Mechanism />}
+{variant === 'globe' && <Globe />}
+{variant === 'entropy' && <Entropy />}

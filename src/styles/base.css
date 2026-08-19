@@ -112,29 +112,6 @@ img { max-width: 100%; }
   );
   filter: blur(30px);
 }
-/* The scenes run bright; this keeps the column the text lives in a stop or two
-   darker so nothing is ever read against a hot background. Edges stay clear so
-   the effect still reaches the sides of the screen. */
-.bg-scrim {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(1340px, 100vw);
-  z-index: 0;
-  pointer-events: none;
-  /* Light touch: the field is hairlines now, so the column only needs a hint
-     of separation rather than the heavy scrim the bright scenes wanted. */
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(7, 7, 8, .22) 16%,
-    rgba(7, 7, 8, .3) 50%,
-    rgba(7, 7, 8, .22) 84%,
-    transparent 100%
-  );
-}
 .bg-scan {
   position: fixed;
   inset: 0;

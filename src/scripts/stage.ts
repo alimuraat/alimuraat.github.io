@@ -1,77 +1,50 @@
 /**
  * Shared harness for every backdrop scene.
  *
- * A scene is a setup function that receives the drawing kit and returns a frame
- * function. The harness owns device pixel ratio, resize, pausing while the tab
- * is hidden, reduced motion, pointer tracking — and the two things that make
- * the scenes glow rather than just draw:
+ * A scene is a setup function that receives the drawing context and returns a
+ * frame function. The harness owns everything a scene should not have to think
+ * about: device pixel ratio, resize, pausing while the tab is hidden, reduced
+ * motion, and pointer tracking.
  *
- *   additive — every stroke adds light instead of covering what is under it,
- *              so overlapping strokes bloom into a bright core
- *   trail    — instead of clearing, the frame is faded toward transparent with
- *              a destination-out fill, which leaves motion trails while
- *              keeping the canvas transparent over the layers behind it
+ * The setup function is re-run on resize, so scenes can lay themselves out
+ * against W and H once instead of recomputing every frame.
  */
 export type Ptr = {
   x: number;
   y: number;
-  /** False until the visitor moves a pointer — scenes drive themselves. */
+  /** False until the visitor actually moves a pointer — scenes fall back to
+   *  driving themselves so nothing looks dead on a phone. */
   seen: boolean;
+  /** Frames since the last pointer movement. */
   idle: number;
   rings: { x: number; y: number; t: number }[];
-  /** Set on pointerdown, cleared by whoever consumes it. */
-  hit: { x: number; y: number } | null;
 };
 
 export type Kit = {
   c: CanvasRenderingContext2D;
   W: number;
   H: number;
+  /** False under prefers-reduced-motion: draw one composed frame, never move. */
   anim: boolean;
   ptr: Ptr;
   rand: (a: number, b: number) => number;
+  /** 'r,g,b' for the signal red, ready for rgba(). */
   RED: string;
   mono: (px: number) => string;
-  /** Pre-rendered radial glow, blitted per particle — far cheaper than a
-   *  gradient per draw and the only way to afford thousands of them. */
-  glow: (px: number, rgb?: string, peak?: number) => HTMLCanvasElement;
 };
-
-type Opts = { trail?: number; additive?: boolean };
 
 const RED = '255,51,68';
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const mono = (px: number) => `${px}px "JetBrains Mono", ui-monospace, monospace`;
 
-const cache = new Map<string, HTMLCanvasElement>();
-function glow(px: number, rgb = RED, peak = 1): HTMLCanvasElement {
-  const key = `${px}|${rgb}|${peak}`;
-  const hit = cache.get(key);
-  if (hit) return hit;
-  const s = document.createElement('canvas');
-  s.width = px * 2;
-  s.height = px * 2;
-  const g = s.getContext('2d')!;
-  const grd = g.createRadialGradient(px, px, 0, px, px, px);
-  grd.addColorStop(0, `rgba(${rgb},${peak})`);
-  grd.addColorStop(0.25, `rgba(${rgb},${peak * 0.45})`);
-  grd.addColorStop(1, `rgba(${rgb},0)`);
-  g.fillStyle = grd;
-  g.fillRect(0, 0, px * 2, px * 2);
-  cache.set(key, s);
-  return s;
-}
-
-export function stage(setup: (kit: Kit) => () => void, opts: Opts = {}): void {
+export function stage(setup: (kit: Kit) => () => void): void {
   const canvas = document.getElementById('net') as HTMLCanvasElement | null;
   const c = canvas?.getContext('2d', { alpha: true });
   if (!canvas || !c) return;
 
   const anim = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const trail = anim ? (opts.trail ?? 0) : 0;
-  const additive = opts.additive !== false;
 
-  const ptr: Ptr = { x: 0, y: 0, seen: false, idle: 0, rings: [], hit: null };
+  const ptr: Ptr = { x: 0, y: 0, seen: false, idle: 0, rings: [] };
   const track = (e: PointerEvent) => {
     ptr.x = e.clientX;
     ptr.y = e.clientY;
@@ -83,7 +56,6 @@ export function stage(setup: (kit: Kit) => () => void, opts: Opts = {}): void {
     'pointerdown',
     (e) => {
       track(e);
-      ptr.hit = { x: e.clientX, y: e.clientY };
       if (ptr.rings.length < 4) ptr.rings.push({ x: e.clientX, y: e.clientY, t: 0 });
     },
     { passive: true }
@@ -106,22 +78,12 @@ export function stage(setup: (kit: Kit) => () => void, opts: Opts = {}): void {
   };
 
   const build = () => {
-    frame = setup({ c, W, H, anim, ptr, rand, RED, mono, glow });
+    frame = setup({ c, W, H, anim, ptr, rand, RED, mono });
   };
 
   const paint = () => {
-    if (trail) {
-      /* Fade what is already there toward transparent rather than painting
-         over it, so the glow layers behind the canvas keep showing through. */
-      c.globalCompositeOperation = 'destination-out';
-      c.fillStyle = `rgba(0,0,0,${trail})`;
-      c.fillRect(0, 0, W, H);
-    } else {
-      c.clearRect(0, 0, W, H);
-    }
-    c.globalCompositeOperation = additive ? 'lighter' : 'source-over';
+    c.clearRect(0, 0, W, H);
     frame();
-    c.globalCompositeOperation = 'source-over';
   };
 
   const loop = () => {
@@ -168,4 +130,22 @@ export function stage(setup: (kit: Kit) => () => void, opts: Opts = {}): void {
     }
     start();
   });
+}
+
+/** Expanding rings from clicks, shared by the scenes that want them. */
+export function drawClickRings(k: Kit): void {
+  const { c, ptr, anim, RED: R } = k;
+  c.lineWidth = 1;
+  for (let i = ptr.rings.length - 1; i >= 0; i--) {
+    const r = ptr.rings[i];
+    if (anim) r.t += 0.02;
+    if (r.t >= 1) {
+      ptr.rings.splice(i, 1);
+      continue;
+    }
+    c.strokeStyle = `rgba(${R},${((1 - r.t) * 0.45).toFixed(3)})`;
+    c.beginPath();
+    c.arc(r.x, r.y, r.t * 260, 0, 6.2832);
+    c.stroke();
+  }
 }

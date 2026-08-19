@@ -9,14 +9,7 @@ import '../styles/tokens.css';
 import '../styles/fonts.css';
 import '../styles/base.css';
 
-type BackdropVariant =
-  | 'binvis'
-  | 'flame'
-  | 'fuzz'
-  | 'treemap'
-  | 'avalanche'
-  | 'azimuth'
-  | 'randomart';
+type BackdropVariant = 'recon' | 'authlog' | 'fracture' | 'build' | 'mechanism' | 'globe' | 'entropy';
 
 interface Props {
   lang: Lang;
@@ -30,7 +23,7 @@ interface Props {
   noindex?: boolean;
 }
 
-const { lang, title, description, ogDescription, backdrop = 'binvis', noindex = false } = Astro.props;
+const { lang, title, description, ogDescription, backdrop = 'recon', noindex = false } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const bare = basePath(Astro.url.pathname);

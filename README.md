@@ -113,39 +113,33 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 
 ## Backdrops
 
-Drawn from the tools of the trade rather than from the film version of them:
-no falling glyphs, no green terminal, no padlocks.
+`Backdrop.astro` paints the fixed layers — top and bottom glow, canvas, 46px
+grid, CRT scanline — and picks one scene per page. Each scene is its own
+component under `src/components/backdrops/`, so a page bundles only the one it
+uses (~1 KB gzip each) on top of the shared harness in `src/scripts/stage.ts`.
 
-| Page | What it is |
-| --- | --- |
-| `/` | `binvis` — an address space laid along a Hilbert curve and coloured by entropy, which is how people who take binaries apart actually look at one. **The pointer is a read head**: whatever region it is over lights up and reports its offset and entropy, and a click sends a scan running along the curve. With no pointer the head walks by itself |
-| `/experience` | `flame` — a flame graph, the way you read where the time actually went |
-| `/research` | `fuzz` — a coverage bitmap filling in, path count climbing, the odd crash marked |
-| `/projects` | `treemap` — what a codebase is made of, re-partitioning on a cycle |
-| `/certifications` | `avalanche` — flip one input bit and watch the digest come apart |
-| `/travel` | `azimuth` — azimuthal-equidistant plot, real great-circle ranges measured from Istanbul, with a sweep |
-| `/contact` | `randomart` — the drunken bishop walked out, exactly as `ssh-keygen` draws a fingerprint |
+The point is that every page gets a different **medium**, not the same motion
+rearranged — a scan field, a log, fracture lines, an isometric wireframe, a
+mechanism, a globe, a waveform:
 
-`Binvis.astro` carries the home page; the other six live in `Panel.astro`,
-which reads the variant off the canvas. Both are plain compositing — no
-additive light, no trails.
+| Page | Scene | What it is |
+| --- | --- | --- |
+| `/` | `recon` | An address lattice under a rotating scan. The pointer carries the scanner; whatever the spoke crosses comes back closed, open with a service, or flagged. Nothing follows the cursor and nothing deforms around it. With no pointer the scan walks the viewport itself |
+| `/experience` | `authlog` | Access log entries appearing in fixed slots and fading — grants, role changes, the occasional denial. Nothing scrolls |
+| `/research` | `fracture` | A stress point opens and a hairline crack walks out of it, branching until it runs out of viewport or energy, then anneals away and the next one starts |
+| `/projects` | `build` | An isometric wireframe landscape of modules that rise, hold and come down again, drawn back to front |
+| `/certifications` | `mechanism` | Notched rings turning at their own rates, then converging their key notches on one mark, holding, and releasing |
+| `/travel` | `globe` | A wireframe globe in orthographic projection, turning for real, with the visited coordinates as markers that fade round the back |
+| `/contact` | `entropy` | Signal bands converting to ciphertext: dense noise behind an advancing boundary, the readable wave ahead of it |
 
-Composition rules that took a while to arrive at:
+The harness owns device pixel ratio (capped at 2), a 180 ms debounced resize,
+pausing the rAF loop while the tab is hidden, pointer tracking, and reduced
+motion — where every scene draws one composed frame and never moves. Structural
+strokes stay low-alpha; only labels and the scan head go brighter.
 
-- The visualisation is **centred behind the column**, not beside it. With
-  1180px of content there is no room for a side panel on an ordinary screen.
-- **No frame, no caption box.** A bordered widget in a corner reads as a
-  widget.
-- Contrast stays low enough that the copy always wins; only the read head on
-  the home page goes bright, and it goes bright because it is the interaction.
-
-The home scene is the heaviest and measures ~5.7 ms on its worst frame, with
-the 4095 curve segments bucketed into four paths by entropy and the bucket
-membership worked out once rather than per frame.
-
-`src/scripts/stage.ts` owns device pixel ratio, the debounced resize, pausing
-while the tab is hidden, pointer state, and reduced motion — where every scene
-draws one composed frame and never moves.
+To add a scene: drop a component next to the others that calls `stage()`,
+register it in `Backdrop.astro`, and add its name to the `BackdropVariant`
+union in `Base.astro`.
 
 ## The experience roadmap
 
