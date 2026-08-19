@@ -116,10 +116,22 @@ shadow in the design is the terminal's `0 0 60px -30px var(--sig-deep)` glow.
 `Backdrop.astro` paints the fixed layers — glow top and bottom, canvas, scrim,
 46px grid, CRT scanline — and picks one scene per page. Each scene is its own
 component under `src/components/backdrops/`, so a page bundles only the one it
-uses (well under 1 KB gzip each) on top of the shared harness in
-`src/scripts/stage.ts`.
+uses on top of the shared harness in `src/scripts/stage.ts`.
 
-Two things in the harness do the heavy lifting:
+Every scene is a piece of generative mathematics rather than a motion, and no
+two use the same one:
+
+| Page | Scene | The maths |
+| --- | --- | --- |
+| `/` | `attractor` | A de Jong attractor — `x' = sin(a·y) − cos(b·x)`, `y' = sin(c·x) − cos(d·y)` — iterated thousands of times a frame, adding a hair of light at every landing. The pointer moves two of the four constants, so the whole filigree reorganises under the cursor instead of anything following it |
+| `/experience` | `harmonograph` | Two damped pendulums per axis, frequencies picked close to whole-number ratios so the trace closes into a rosette, drawing itself tighter until it settles and a new set of constants starts the next figure |
+| `/research` | `diffusion` | Gray-Scott reaction-diffusion on an offscreen lattice. Nothing scripts the shapes; the coral falls out of two equations. Uses the weighted nine-point Laplacian — with `dt = 1` and `Du = 1` a five-point one is past its stability limit and runs away to NaN |
+| `/projects` | `truchet` | Recursive Truchet tiling: the plane subdivides into quarters, every leaf carries the same two arcs, and because arcs always meet at edge midpoints the local choices join into one continuous labyrinth that rewires itself without ever breaking |
+| `/certifications` | `guilloche` | The engine-turned rosette engraved on banknotes and certificates, for the same reason it is here — easy to verify, hard to reproduce. Nested hypotrochoids counter-rotating at slightly different rates |
+| `/travel` | `geodesic` | An icosahedron subdivided twice onto the unit sphere: 320 near-equal faces, every edge drawn front and back, with real great circles slerped between the visited coordinates |
+| `/contact` | `chladni` | The nodal figure of a driven plate, `f = sin(nπx)sin(mπy) − sin(mπx)sin(nπy)`, drawn from the field and dusted with particles whose step is scaled by how hard the plate shakes under them. Mode numbers stay whole — between two whole numbers the nodal lines do not close |
+
+Two things in the harness do the rendering work:
 
 - **additive** — strokes add light instead of covering what is under them, so
   overlaps bloom into a bright core rather than flattening
@@ -127,22 +139,14 @@ Two things in the harness do the heavy lifting:
   `destination-out` fill, which leaves motion trails while keeping the canvas
   transparent over the layers behind it
 
-| Page | Scene | What it is |
-| --- | --- | --- |
-| `/` | `flux` | A few thousand particles on a curl field. Inside the sensor radius they are pushed out and swept into an orbit, so the field opens around the cursor and closes behind it; a click sends a shock ring through it |
-| `/experience` | `rails` | Packets accelerating down parallel rails, trails behind them, blooming when they reach a station |
-| `/research` | `interference` | Three drifting sources sampled on a lattice — bright where their waves agree, dark where they cancel |
-| `/projects` | `skyline` | Isometric blocks under a band of light sweeping diagonally; roofs light and taller blocks throw a beam as it passes |
-| `/certifications` | `crystal` | An icosahedron — twelve vertices, edges found by distance — turning on two axes in perspective, with a smaller one counter-rotating inside |
-| `/travel` | `aurora` | Ribbons of light drifting across each other; the colour comes from where they overlap, nothing is painted bright on its own |
-| `/contact` | `beacon` | Streaks turning around a core, messages falling in from the edges and being absorbed, an answer ring every few seconds |
+With a trail fade of `f`, anything drawn in the same place every frame settles
+at roughly `1/f` times its per-frame alpha. That ratio is the tuning dial for
+the accumulating scenes — the attractor and the Chladni sand are set by it, not
+by eye.
 
 `.bg-scrim` keeps the column the text lives in a stop or two darker than the
 edges, which is what lets the scenes run bright without costing the copy any
-contrast. Two dials tune the whole thing: the `trail` value per scene (lower is
-longer trails) and `globalAlpha` on the draws. With a trail fade of `f`,
-anything drawn in the same place every frame settles at roughly `1/f` times its
-per-frame alpha — that is why the steady-state elements are set low.
+contrast.
 
 Under `prefers-reduced-motion: reduce` every scene draws one composed frame and
 never moves.

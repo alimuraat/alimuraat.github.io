@@ -1,0 +1,94 @@
+---
+/**
+ * Experience — a harmonograph.
+ *
+ * Two damped pendulums per axis, drawn as one continuous line:
+ *
+ *   x(t) = Σ Aᵢ·sin(fᵢ·t + φᵢ)·e^(−dᵢ·t)
+ *
+ * Frequencies are picked close to whole-number ratios, which is what turns the
+ * trace into a rosette instead of a scribble; the damping means it draws
+ * itself tighter and tighter until it settles, and then a new set of constants
+ * starts the next figure. Nothing here repeats.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage(
+    (k) => {
+      const { c, W, H, anim, rand, RED } = k;
+
+      const cx = W > 900 ? W * 0.68 : W * 0.5;
+      const cy = H * 0.5;
+      const R = Math.min(W * 0.34, H * 0.42);
+
+      /* Near-integer ratios, detuned by a hair so the figure precesses. */
+      const pen = () => {
+        const base = 1 + ((Math.random() * 5) | 0);
+        return {
+          f: base + rand(-0.008, 0.008),
+          p: rand(0, 6.2832),
+          a: rand(0.35, 1),
+          d: rand(0.0016, 0.0042),
+        };
+      };
+
+      let px = [pen(), pen()];
+      let py = [pen(), pen()];
+      let t = 0;
+      let fade = 0;
+
+      const at = (u: number) => {
+        const damp = (q: { d: number }) => Math.exp(-q.d * u);
+        return {
+          x:
+            cx +
+            R * (px[0].a * Math.sin(px[0].f * u + px[0].p) * damp(px[0]) +
+              px[1].a * Math.sin(px[1].f * u + px[1].p) * damp(px[1])) * 0.5,
+          y:
+            cy +
+            R * (py[0].a * Math.sin(py[0].f * u + py[0].p) * damp(py[0]) +
+              py[1].a * Math.sin(py[1].f * u + py[1].p) * damp(py[1])) * 0.5,
+        };
+      };
+
+      return () => {
+        const amp = Math.exp(-0.0016 * t);
+
+        if (anim) {
+          if (amp < 0.16) {
+            fade += 0.01;
+            if (fade >= 1) {
+              px = [pen(), pen()];
+              py = [pen(), pen()];
+              t = 0;
+              fade = 0;
+            }
+          }
+        }
+
+        /* Draw a stretch of the curve each frame, so the figure builds. */
+        const SEG = 26;
+        const dt = 0.014;
+        c.lineWidth = 1;
+        c.strokeStyle = `rgba(${RED},${(0.3 * (1 - fade)).toFixed(3)})`;
+        c.beginPath();
+        let q = at(t);
+        c.moveTo(q.x, q.y);
+        for (let i = 0; i < SEG; i++) {
+          if (anim) t += dt;
+          q = at(t);
+          c.lineTo(q.x, q.y);
+        }
+        c.stroke();
+
+        /* A brighter head so the eye can follow where it is drawing. */
+        c.fillStyle = `rgba(255,200,206,${(0.5 * (1 - fade)).toFixed(3)})`;
+        c.fillRect(q.x - 1.5, q.y - 1.5, 3, 3);
+      };
+    },
+    { trail: 0.006, additive: true }
+  );
+</script>

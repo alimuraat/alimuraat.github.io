@@ -1,0 +1,117 @@
+---
+/**
+ * Research — Gray-Scott reaction-diffusion.
+ *
+ *   U' = U + (Dᵤ∇²U − UV² + F(1−U))
+ *   V' = V + (Dᵥ∇²V + UV² − (F+k)V)
+ *
+ * Two substances, one feeding on the other, on a lattice. Nothing scripts the
+ * shapes — the coral and the fingerprints fall out of those two lines. It runs
+ * on an offscreen buffer at a coarse resolution and is scaled up, which is the
+ * only reason a full-screen simulation is affordable.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage(
+    (k) => {
+      const { c, W, H, anim } = k;
+
+      const CELL = 7;
+      const gw = Math.max(40, Math.min(240, Math.ceil(W / CELL)));
+      const gh = Math.max(30, Math.min(200, Math.ceil(H / CELL)));
+      const n = gw * gh;
+
+      const U = new Float32Array(n).fill(1);
+      const V = new Float32Array(n);
+      const U2 = new Float32Array(n);
+      const V2 = new Float32Array(n);
+
+      const seed = (count: number) => {
+        for (let s = 0; s < count; s++) {
+          const px = ((Math.random() * gw) | 0);
+          const py = ((Math.random() * gh) | 0);
+          for (let y = -3; y <= 3; y++) {
+            for (let x = -3; x <= 3; x++) {
+              const i = ((py + y + gh) % gh) * gw + ((px + x + gw) % gw);
+              V[i] = 1;
+              U[i] = 0.2;
+            }
+          }
+        }
+      };
+      seed(22);
+
+      const DA = 1;
+      const DB = 0.5;
+      const F = 0.0362;
+      const K = 0.0609;
+
+      const buf = document.createElement('canvas');
+      buf.width = gw;
+      buf.height = gh;
+      const bx = buf.getContext('2d')!;
+      const img = bx.createImageData(gw, gh);
+
+      let f = 0;
+
+      /* The weighted nine-point Laplacian, not a plain five-point one: with
+         dt = 1 and Du = 1 the five-point version is past its stability limit
+         and the field runs away to NaN within a second. */
+      const step = () => {
+        for (let y = 0; y < gh; y++) {
+          const yu = ((y - 1 + gh) % gh) * gw;
+          const yd = ((y + 1) % gh) * gw;
+          const yc = y * gw;
+          for (let x = 0; x < gw; x++) {
+            const xl = (x - 1 + gw) % gw;
+            const xr = (x + 1) % gw;
+            const i = yc + x;
+            const lu =
+              -U[i] +
+              0.2 * (U[yc + xl] + U[yc + xr] + U[yu + x] + U[yd + x]) +
+              0.05 * (U[yu + xl] + U[yu + xr] + U[yd + xl] + U[yd + xr]);
+            const lv =
+              -V[i] +
+              0.2 * (V[yc + xl] + V[yc + xr] + V[yu + x] + V[yd + x]) +
+              0.05 * (V[yu + xl] + V[yu + xr] + V[yd + xl] + V[yd + xr]);
+            const uvv = U[i] * V[i] * V[i];
+            U2[i] = U[i] + (DA * lu - uvv + F * (1 - U[i]));
+            V2[i] = V[i] + (DB * lv + uvv - (F + K) * V[i]);
+          }
+        }
+        U.set(U2);
+        V.set(V2);
+      };
+
+      return () => {
+        f++;
+        if (anim) {
+          for (let it = 0; it < 4; it++) step();
+          /* Keep it from settling into a still frame. */
+          if (f % 900 === 0) seed(3);
+        }
+
+        const d = img.data;
+        for (let i = 0; i < n; i++) {
+          const g = Math.min(1, V[i] * 3.4);
+          d[i * 4] = 255 * Math.min(1, g * 1.6);
+          d[i * 4 + 1] = 60 * g;
+          d[i * 4 + 2] = 70 * g;
+          d[i * 4 + 3] = 255 * Math.min(1, g * 0.8);
+        }
+        bx.putImageData(img, 0, 0);
+
+        c.globalCompositeOperation = 'source-over';
+        c.globalAlpha = 0.4;
+        c.imageSmoothingEnabled = true;
+        c.drawImage(buf, 0, 0, W, H);
+        c.globalAlpha = 1;
+        c.globalCompositeOperation = 'lighter';
+      };
+    },
+    { additive: true }
+  );
+</script>

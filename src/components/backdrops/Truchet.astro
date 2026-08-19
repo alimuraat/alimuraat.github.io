@@ -1,0 +1,93 @@
+---
+/**
+ * Projects — recursive Truchet tiling.
+ *
+ * The plane is subdivided into quarters, and quarters of quarters, down a few
+ * levels. Every leaf carries the same two quarter-arcs, and the only choice
+ * per tile is which way round they sit — but because the arcs always meet
+ * their neighbours at edge midpoints, those local choices join up into one
+ * continuous labyrinth. Tiles flip on their own, so the labyrinth keeps
+ * rewiring itself without ever breaking.
+ */
+---
+
+<script>
+  import { stage } from '../../scripts/stage';
+
+  stage(
+    (k) => {
+      const { c, W, H, anim, rand, RED } = k;
+
+      type Tile = { x: number; y: number; s: number; r: number; to: number; wait: number };
+      const tiles: Tile[] = [];
+
+      const base = Math.max(96, Math.min(190, Math.round(Math.min(W, H) / 6)));
+
+      const split = (x: number, y: number, s: number, depth: number) => {
+        if (depth > 0 && s > base * 0.3 && Math.random() < 0.46) {
+          const h = s / 2;
+          split(x, y, h, depth - 1);
+          split(x + h, y, h, depth - 1);
+          split(x, y + h, h, depth - 1);
+          split(x + h, y + h, h, depth - 1);
+          return;
+        }
+        const r = Math.random() < 0.5 ? 0 : 1;
+        tiles.push({ x, y, s, r, to: r, wait: rand(0, 700) });
+      };
+
+      for (let y = -base; y < H + base; y += base) {
+        for (let x = -base; x < W + base; x += base) split(x, y, base, 2);
+      }
+
+      return () => {
+        c.lineWidth = 1;
+
+        for (const t of tiles) {
+          if (anim) {
+            if (t.wait > 0) t.wait--;
+            else {
+              t.r += (t.to - t.r) * 0.06;
+              if (Math.abs(t.to - t.r) < 0.01) {
+                t.r = t.to;
+                t.to = t.to > 0.5 ? 0 : 1;
+                t.wait = rand(200, 1600);
+              }
+            }
+          }
+
+          const h = t.s / 2;
+          const turn = t.r * 1.5708;
+          const weight = 0.22 + (1 - Math.abs(t.r - 0.5) * 2) * 0.34;
+
+          c.save();
+          c.translate(t.x + h, t.y + h);
+          c.rotate(turn);
+
+          /* Each arc twice: a wide soft pass and a sharp one over it. Additively
+             that reads as a lit line rather than a drawn one. */
+          for (const [lw, mul] of [[3.5, 0.3], [1, 1]] as [number, number][]) {
+            c.lineWidth = lw;
+            c.strokeStyle = `rgba(${RED},${(weight * mul).toFixed(3)})`;
+            c.beginPath();
+            c.arc(-h, -h, h, 0, 1.5708);
+            c.stroke();
+            c.beginPath();
+            c.arc(h, h, h, 3.1416, 4.7124);
+            c.stroke();
+
+            c.strokeStyle = `rgba(${RED},${(weight * mul * 0.5).toFixed(3)})`;
+            c.beginPath();
+            c.arc(-h, -h, h * 0.62, 0, 1.5708);
+            c.stroke();
+            c.beginPath();
+            c.arc(h, h, h * 0.62, 3.1416, 4.7124);
+            c.stroke();
+          }
+          c.restore();
+        }
+      };
+    },
+    { additive: true }
+  );
+</script>

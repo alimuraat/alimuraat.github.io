@@ -14,27 +14,28 @@
  * Each is its own component so a page bundles only the one it uses; they share
  * the harness in src/scripts/stage.ts.
  *
- *   flux         — a flow field that opens around the pointer  (/)
- *   rails        — light accelerating along parallel rails     (/experience)
- *   interference — three drifting sources, sampled on a grid   (/research)
- *   skyline      — isometric blocks under a sweeping light     (/projects)
- *   crystal      — an icosahedron turning in perspective       (/certifications)
- *   aurora       — ribbons of light adding up where they cross (/travel)
- *   beacon       — streaks, incoming messages, answer rings    (/contact)
+ *   attractor    — a de Jong attractor steered by the pointer  (/)
+ *   harmonograph — damped pendulums tracing one rosette        (/experience)
+ *   diffusion    — Gray-Scott reaction-diffusion               (/research)
+ *   truchet      — recursive Truchet tiling rewiring itself    (/projects)
+ *   guilloche    — engine-turned rosettes, as on a certificate (/certifications)
+ *   geodesic     — subdivided sphere with great circles        (/travel)
+ *   chladni      — particles settling on nodal lines           (/contact)
  */
-import Flux from './backdrops/Flux.astro';
-import Rails from './backdrops/Rails.astro';
-import Interference from './backdrops/Interference.astro';
-import Skyline from './backdrops/Skyline.astro';
-import Crystal from './backdrops/Crystal.astro';
-import Aurora from './backdrops/Aurora.astro';
-import Beacon from './backdrops/Beacon.astro';
+
+import Attractor from './backdrops/Attractor.astro';
+import Harmonograph from './backdrops/Harmonograph.astro';
+import Diffusion from './backdrops/Diffusion.astro';
+import Truchet from './backdrops/Truchet.astro';
+import Guilloche from './backdrops/Guilloche.astro';
+import Geodesic from './backdrops/Geodesic.astro';
+import Chladni from './backdrops/Chladni.astro';
 
 interface Props {
-  variant?: 'flux' | 'rails' | 'interference' | 'skyline' | 'crystal' | 'aurora' | 'beacon';
+  variant?: 'attractor' | 'harmonograph' | 'diffusion' | 'truchet' | 'guilloche' | 'geodesic' | 'chladni';
 }
 
-const { variant = 'flux' } = Astro.props;
+const { variant = 'attractor' } = Astro.props;
 ---
 
 <div class="bg-glow" aria-hidden="true"></div>
@@ -44,10 +45,11 @@ const { variant = 'flux' } = Astro.props;
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-scan" aria-hidden="true"></div>
 
-{variant === 'flux' && <Flux />}
-{variant === 'rails' && <Rails />}
-{variant === 'interference' && <Interference />}
-{variant === 'skyline' && <Skyline />}
-{variant === 'crystal' && <Crystal />}
-{variant === 'aurora' && <Aurora />}
-{variant === 'beacon' && <Beacon />}
+{variant === 'attractor' && <Attractor />}
+{variant === 'harmonograph' && <Harmonograph />}
+{variant === 'diffusion' && <Diffusion />}
+{variant === 'truchet' && <Truchet />}
+{variant === 'guilloche' && <Guilloche />}
+{variant === 'geodesic' && <Geodesic />}
+{variant === 'chladni' && <Chladni />}
+

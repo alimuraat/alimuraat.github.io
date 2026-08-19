@@ -9,7 +9,7 @@ import '../styles/tokens.css';
 import '../styles/fonts.css';
 import '../styles/base.css';
 
-type BackdropVariant = 'flux' | 'rails' | 'interference' | 'skyline' | 'crystal' | 'aurora' | 'beacon';
+type BackdropVariant = 'attractor' | 'harmonograph' | 'diffusion' | 'truchet' | 'guilloche' | 'geodesic' | 'chladni';
 
 interface Props {
   lang: Lang;
@@ -23,7 +23,7 @@ interface Props {
   noindex?: boolean;
 }
 
-const { lang, title, description, ogDescription, backdrop = 'flux', noindex = false } = Astro.props;
+const { lang, title, description, ogDescription, backdrop = 'attractor', noindex = false } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const bare = basePath(Astro.url.pathname);
